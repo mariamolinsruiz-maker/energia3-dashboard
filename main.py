@@ -80,9 +80,9 @@ def create_community(comm: dict):
         clean["email"] = str(comm.get("email", ""))
         clean["telefon"] = str(comm.get("telefon", ""))
 
-        clean["lat"] = float(comm.get("lat", 0))
-        clean["lng"] = float(comm.get("lng", 0))
-        clean["potencia"] = parse_float(comm.get("potencia"))
+        clean["lat"] = parse_float(comm.get("lat"))
+        clean["lng"] = parse_float(comm.get("lng"))
+        clean["total_kw"] = parse_float(comm.get("total_kw"))
         clean["color"] = str(comm.get("color", "#1B4D31"))
 
         clean["onboarding"] = str(comm.get("onboarding", "Obert"))
@@ -106,8 +106,8 @@ def create_community(comm: dict):
 
         clean["total_clients"] = int(comm.get("total_clients", 0))
         clean["total_kw"] = float(comm.get("total_kw", 0))
-        clean["total_estalvi"] = float(comm.get("total_estalvi", 0))
-
+        clean["total_estalvi"] = parse_float(comm.get("total_estalvi"))
+        
         print("INSERT:", clean)
 
         res = supabase.table("communities").insert(clean).execute()
