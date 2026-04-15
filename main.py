@@ -121,15 +121,44 @@ def create_community(comm: dict):
 
 @app.put("/api/communities/{comm_id}")
 def update_community(comm_id: str, comm: dict):
-    res = supabase.table("communities") \
-        .update(comm) \
-        .eq("id", comm_id) \
-        .execute()
+    try:
+        clean = {}
 
-    if not res.data:
-        raise HTTPException(404, "Comunitat no trobada")
+        clean["nom"] = str(comm.get("nom", ""))
+        clean["promotor"] = str(comm.get("promotor", ""))
+        clean["adreca"] = str(comm.get("adreca", ""))
+        clean["contacte"] = str(comm.get("contacte", ""))
+        clean["email"] = str(comm.get("email", ""))
+        clean["telefon"] = str(comm.get("telefon", ""))
 
-    return res.data[0]
+        clean["lat"] = parse_float(comm.get("lat"))
+        clean["lng"] = parse_float(comm.get("lng"))
+        clean["potencia"] = parse_float(comm.get("potencia"))
+        clean["color"] = str(comm.get("color", "#1B4D31"))
+
+        clean["onboarding"] = str(comm.get("onboarding", ""))
+        clean["acord_reparto"] = str(comm.get("acord_reparto", ""))
+        clean["fi_inscripcions"] = str(comm.get("fi_inscripcions", ""))
+        clean["informe_auto"] = str(comm.get("informe_auto", ""))
+        clean["marca_blanca"] = str(comm.get("marca_blanca", ""))
+
+        clean["total_clients"] = int(comm.get("total_clients", 0))
+        clean["total_kw"] = parse_float(comm.get("total_kw"))
+        clean["total_estalvi"] = parse_float(comm.get("total_estalvi"))
+
+        res = supabase.table("communities") \
+            .update(clean) \
+            .eq("id", comm_id) \
+            .execute()
+
+        if not res.data:
+            raise HTTPException(404, "Comunitat no trobada")
+
+        return res.data[0]
+
+    except Exception as e:
+        print("ERROR UPDATE:", e)
+        raise HTTPException(500, str(e))
 
 
 @app.delete("/api/communities/{comm_id}")
