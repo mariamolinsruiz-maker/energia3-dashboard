@@ -311,6 +311,7 @@ window.deleteClient = async function (codi, event) {
   );
 };
 
+
 // ─────────────────────────────────────────────────────────────
 //  Punt d'entrada: carregar dades quan el DOM estigui llest
 // ─────────────────────────────────────────────────────────────
@@ -319,3 +320,54 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log("🚀 Web carregada — carregant dades del backend...");
   loadFromAPI();
 });
+
+
+// ─────────────────────────────────────────────
+// EXPORT CSV (genèric)
+// ─────────────────────────────────────────────
+function downloadCSV(data, filename = "export.csv") {
+  if (!data || !data.length) {
+    alert("No hi ha dades per exportar");
+    return;
+  }
+
+  const headers = Object.keys(data[0]);
+
+  const csv = [
+    headers.join(","),
+    ...data.map(row =>
+      headers.map(h => `"${(row[h] ?? "").toString().replace(/"/g, '""')}"`).join(",")
+    )
+  ].join("\n");
+
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = filename;
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+
+// ── EXPORTAR CLIENTS SEGONS FILTRE ──
+function exportClientsVisible() {
+  const select = document.getElementById("filter-community"); // ⚠️ important
+
+  let data = CLIENTS;
+
+  if (select && select.value !== "all") {
+    data = CLIENTS.filter(c => c.comunitat === select.value);
+  }
+
+  downloadCSV(data, "clients.csv");
+}
+
+
+// ── EXPORTAR COMUNITATS ──
+function exportCommunitiesAll() {
+  downloadCSV(COMMUNITIES, "communities.csv");
+}
