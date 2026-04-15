@@ -53,8 +53,7 @@ async function loadFromAPI() {
 
     // Re-renderitzar tot el frontend amb les noves dades
     navigate('dashboard');
-    renderClientsTable();
-
+  
     console.log(
       `✅ Dades carregades: ${COMMUNITIES.length} comunitats, ${CLIENTS.length} clients`
     );
