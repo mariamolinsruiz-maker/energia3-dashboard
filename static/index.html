@@ -1124,6 +1124,13 @@ function updateBreadcrumb(view, params) {
 // ═══════════════════════════════════════════
 function initDashboard() {
   renderDashboardCommunityCards();
+
+  // 🔴 Forçar reset mapa
+  if (mapDashboard) {
+    mapDashboard.remove();
+    mapDashboard = null;
+  }
+
   setTimeout(() => {
     initMapDashboard();
     initGlobalCharts();
