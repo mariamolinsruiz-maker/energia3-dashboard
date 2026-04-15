@@ -29,11 +29,17 @@ app.add_middleware(
 # Fitxers estàtics (app.js, etc.) — servits a /static/
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-
-
-# ─────────────────────────────────────
+## ─────────────────────────────────────
 #  Helpers de dades
 # ─────────────────────────────────────
+
+def parse_float(value):
+    if value is None:
+        return 0.0
+    if isinstance(value, (int, float)):
+        return float(value)
+    value = str(value).replace("kW", "").replace(",", ".").strip()
+    return float(value)
 
 # ─────────────────────────────────────
 #  Ruta principal — injecta app.js
@@ -76,8 +82,7 @@ def create_community(comm: dict):
 
         clean["lat"] = float(comm.get("lat", 0))
         clean["lng"] = float(comm.get("lng", 0))
-        clean["potencia"] = float(comm.get("potencia", 0))
-
+        clean["potencia"] = parse_float(comm.get("potencia"))
         clean["color"] = str(comm.get("color", "#1B4D31"))
 
         clean["onboarding"] = str(comm.get("onboarding", "Obert"))
