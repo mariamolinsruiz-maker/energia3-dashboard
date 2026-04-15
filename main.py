@@ -62,13 +62,52 @@ def get_communities():
 
 
 @app.post("/api/communities", status_code=201)
+@app.post("/api/communities", status_code=201)
 def create_community(comm: dict):
     try:
-        print("DATA QUE ARRIBA:", comm)
+        # 👇 neteja i tipus correctes
+        clean = {}
 
-        res = supabase.table("communities").insert(comm).execute()
+        clean["id"] = str(comm.get("id"))
+        clean["nom"] = str(comm.get("nom", ""))
+        clean["adreca"] = str(comm.get("adreca", ""))
+        clean["promotor"] = str(comm.get("promotor", ""))
+        clean["contacte"] = str(comm.get("contacte", ""))
+        clean["email"] = str(comm.get("email", ""))
+        clean["telefon"] = str(comm.get("telefon", ""))
 
-        print("RESULTAT:", res)
+        clean["lat"] = float(comm.get("lat", 0))
+        clean["lng"] = float(comm.get("lng", 0))
+        clean["potencia"] = float(comm.get("potencia", 0))
+
+        clean["color"] = str(comm.get("color", "#1B4D31"))
+
+        clean["onboarding"] = str(comm.get("onboarding", "Obert"))
+        clean["acord_reparto"] = str(comm.get("acord_reparto", "Pendent"))
+        clean["fi_inscripcions"] = str(comm.get("fi_inscripcions", ""))
+        clean["informe_auto"] = str(comm.get("informe_auto", ""))
+        clean["marca_blanca"] = str(comm.get("marca_blanca", ""))
+
+        # números
+        clean["clients_actius"] = int(comm.get("clients_actius", 0))
+        clean["inscrits"] = int(comm.get("inscrits", 0))
+        clean["cups_auth_actius"] = int(comm.get("cups_auth_actius", 0))
+        clean["cups_auth_proposats"] = int(comm.get("cups_auth_proposats", 0))
+        clean["sense_auth"] = int(comm.get("sense_auth", 0))
+        clean["datadis_actius"] = int(comm.get("datadis_actius", 0))
+        clean["clients_app"] = int(comm.get("clients_app", 0))
+        clean["sense_dades"] = int(comm.get("sense_dades", 0))
+        clean["sol_licituds"] = int(comm.get("sol_licituds", 0))
+
+        clean["autoconsumos"] = str(comm.get("autoconsumos", "0/0"))
+
+        clean["total_clients"] = int(comm.get("total_clients", 0))
+        clean["total_kw"] = float(comm.get("total_kw", 0))
+        clean["total_estalvi"] = float(comm.get("total_estalvi", 0))
+
+        print("INSERT:", clean)
+
+        res = supabase.table("communities").insert(clean).execute()
 
         return res.data
 
