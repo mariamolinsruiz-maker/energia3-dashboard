@@ -316,8 +316,6 @@ window.deleteClient = async function (codi, event) {
 //  Punt d'entrada: carregar dades quan el DOM estigui llest
 // ─────────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', loadFromAPI);
-
 document.addEventListener('DOMContentLoaded', () => {
   console.log("🚀 Web carregada — carregant dades del backend...");
   loadFromAPI();
