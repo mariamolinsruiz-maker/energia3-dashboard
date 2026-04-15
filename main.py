@@ -63,16 +63,18 @@ def get_communities():
 
 @app.post("/api/communities", status_code=201)
 def create_community(comm: dict):
-    existing = supabase.table("communities") \
-        .select("id") \
-        .eq("id", comm.get("id")) \
-        .execute()
+    try:
+        print("DATA QUE ARRIBA:", comm)
 
-    if existing.data:
-        raise HTTPException(400, f"Ja existeix una comunitat amb ID {comm.get('id')}")
+        res = supabase.table("communities").insert(comm).execute()
 
-    supabase.table("communities").insert(comm).execute()
-    return comm
+        print("RESULTAT:", res)
+
+        return res.data
+
+    except Exception as e:
+        print("ERROR REAL:", e)
+        raise HTTPException(500, str(e))
 
 
 @app.put("/api/communities/{comm_id}")
