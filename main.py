@@ -60,8 +60,6 @@ def get_communities():
     res = supabase.table("communities").select("*").execute()
     return res.data
 
-
-@app.post("/api/communities", status_code=201)
 @app.post("/api/communities", status_code=201)
 def create_community(comm: dict):
     try:
