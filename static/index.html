@@ -1165,7 +1165,9 @@ function commCardHTML(c) {
 }
 
 function initMapDashboard() {
-  if (mapDashboard) return;
+  if (mapDashboard) {
+  mapDashboard.remove();
+}
   mapDashboard = L.map('map-dashboard').setView([41.62, 1.95], 9);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'© OpenStreetMap'}).addTo(mapDashboard);
   COMMUNITIES.forEach(c => {
