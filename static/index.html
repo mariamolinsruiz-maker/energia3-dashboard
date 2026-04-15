@@ -2148,11 +2148,12 @@ function saveComm() {
   };
 
   // ── Process client rows ──
-  const rows = document.querySelectorAll('#client-rows-body .client-table-row');
+  const rows = document.querySelectorAll('#client-rows-body tr');
   const newClients = [];
+  console.log("Rows detectades:", rows.length);
   rows.forEach((row, i) => {
-    const r = row.id.replace('crow-', '');
-    const nom_cl = document.getElementById('cr-nom-' + r)?.value.trim();
+    const r = i + 1;
+    const nom_cl = row.querySelector('[id^="cr-nom-"]')?.value?.trim();
     if (!nom_cl) return; // skip empty rows
     const codi = row.dataset.codi || nextClientCodi_seq(id, i + 1);
     const kw = parseFloat(document.getElementById('cr-kw-' + r)?.value) || 0;
