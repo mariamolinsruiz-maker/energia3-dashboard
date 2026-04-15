@@ -98,7 +98,7 @@ window.saveComm = async function () {
     email:           document.getElementById('c-email').value.trim(),
     telefon:         document.getElementById('c-tel').value.trim(),
     adreca:          document.getElementById('c-adreca').value.trim(),
-    potencia:        `${potencia},0 kW`,
+    potencia:        potencia,
     onboarding:      document.getElementById('c-onboarding').value,
     acord_reparto:   document.getElementById('c-acord').value,
     fi_inscripcions: fi,
