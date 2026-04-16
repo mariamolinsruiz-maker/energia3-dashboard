@@ -430,8 +430,7 @@ function downloadCSV(data, filename = "export.csv") {
 
 // ── EXPORTAR CLIENTS SEGONS FILTRE ──
 function exportClientsVisible() {
-  const select = document.getElementById("filter-community"); // ⚠️ important
-
+  const select = document.getElementById("filter-comm-clients");
   let data = CLIENTS;
 
   if (select && select.value !== "all") {
