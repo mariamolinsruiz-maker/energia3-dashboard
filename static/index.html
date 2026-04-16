@@ -1624,8 +1624,17 @@ if (panel) panel.classList.add('active');
 //  CLIENTS TABLE
 // ═══════════════════════════════════════════
 function renderClientsTable(communityFilter) {
+  // Omplir selector comunitats
 const sel = document.getElementById('filter-comm-clients');
-const cf = communityFilter || (sel ? sel.value : '');
+if (sel && sel.options.length <= 1) {
+  sel.innerHTML =
+    '<option value="">Totes les comunitats</option>' +
+    COMMUNITIES.map(c =>
+      `<option value="${c.id}">${c.nom} (${c.id})</option>`
+    ).join('');
+}
+const sel = document.getElementById('filter-comm-clients');
+const cf = communityFilter ?? sel?.value ?? '';
 const data = cf ? CLIENTS.filter(c => c.comunitat === cf) : CLIENTS;
 const tbody = document.getElementById('clients-tbody');
 tbody.innerHTML = data.map(c => {
@@ -1650,6 +1659,12 @@ return `<tr>
 }).join('');
 document.getElementById('stat-total-clients').textContent = data.length;
 document.getElementById('stat-actius').textContent = data.filter(c=>c.estat==='Actiu').length;
+// Total comunitats (només les que tenen clients visibles)
+const elComms = document.getElementById('kpi-clients-comms');
+if (elComms) {
+  const total = new Set(data.map(c => c.comunitat)).size;
+  elComms.textContent = total;
+}
 }
 
 function filterClientsTable() {
