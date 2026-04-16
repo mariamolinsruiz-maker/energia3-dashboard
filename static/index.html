@@ -1770,11 +1770,7 @@ setTimeout(() => { btn.textContent = '🔄 Actualitzar'; }, 1200);
 // ═══════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', async () => {
-await loadDataFromSupabase();
-navigate('dashboard');
-renderClientsTable();
-});
+
 
 // ═══════════════════════════════════════════════════════════════
 //  CRUD — COMUNITATS & CLIENTS
@@ -2178,7 +2174,6 @@ CLIENTS.push(newCl);
 const comm = COMMUNITIES.find(c => c.id === editingClientCommId);
 if (comm) {
 const commClients = CLIENTS.filter(c => c.comunitat === editingClientCommId);
-getClientsByCommunity(comm.id).length = commClients.length;
 comm.total_kw = commClients.reduce((s, c) => s + c.kw, 0);
 }
 showToast('✅ Participant afegit correctament');
@@ -2285,16 +2280,6 @@ function renderIncidents() {
   `).join('');
 }
 
-  async function loadDataFromSupabase() {
-    const { data: comms } = await supabase.from('communities').select('*');
-    if (comms) COMMUNITIES = comms;
-    const { data: clients } = await supabase.from('clients').select('*');
-    if (clients) CLIENTS = clients;
-    const { data: agreements } = await supabase.from('agreements').select('*');
-    if (agreements) AGREEMENTS = agreements;
-    const { data: incidents } = await supabase.from('incidents').select('*');
-    if (incidents) INCIDENTS = incidents;
-  }
   
 </script>
 
