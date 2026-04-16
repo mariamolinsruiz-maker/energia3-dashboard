@@ -67,6 +67,14 @@ async function loadFromAPI() {
     console.log(
       `✅ Dades carregades: ${COMMUNITIES.length} comunitats, ${CLIENTS.length} clients`
     );
+    const statsA = getAgreementsStats();
+    const badgeA = document.getElementById('badge-acords');
+    if (badgeA) badgeA.textContent = statsA.pendents;
+
+    const statsI = getIncidentsStats();
+    const badgeE = document.getElementById('badge-errors');
+    if (badgeE) badgeE.textContent = statsI.ambErrors;
+
   } catch (err) {
     console.error('❌ Error carregant dades de l\'API:', err.message);
     // Fallback: continua amb les dades hardcoded que ja hi ha a l'HTML
