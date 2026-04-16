@@ -208,3 +208,22 @@ def update_client(codi: str, client: dict):
 def delete_client(codi: str):
     supabase.table("clients").delete().eq("codi", codi).execute()
     return {"ok": True}
+
+# ─────────────────────────────────────
+#  /api/agreements
+# ─────────────────────────────────────
+
+@app.get("/api/agreements")
+def get_agreements():
+    res = supabase.table("agreements").select("*").execute()
+    return res.data
+
+
+# ─────────────────────────────────────
+#  /api/incidents
+# ─────────────────────────────────────
+
+@app.get("/api/incidents")
+def get_incidents():
+    res = supabase.table("incidents").select("*").execute()
+    return res.data
