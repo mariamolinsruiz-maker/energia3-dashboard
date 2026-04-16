@@ -75,6 +75,23 @@ async function loadFromAPI() {
     const badgeE = document.getElementById('badge-errors');
     if (badgeE) badgeE.textContent = statsI.ambErrors;
 
+      // Comunitats
+    const elComms = document.getElementById('kpi-dashboard-comms');
+    if (elComms) elComms.textContent = COMMUNITIES.length;
+
+    // Acords pendents
+    const elAcords = document.getElementById('kpi-dashboard-acords');
+    if (elAcords) elAcords.textContent = statsA.pendents;
+
+    // Total clients
+    const elClients = document.getElementById('kpi-dashboard-clients');
+    if (elClients) elClients.textContent = CLIENTS.length;
+
+    // Potència total
+    const totalKW = CLIENTS.reduce((sum, c) => sum + (c.kw || 0), 0);
+    const elKW = document.getElementById('kpi-dashboard-kw');
+    if (elKW) elKW.textContent = totalKW.toFixed(1) + ' kW';
+  
   } catch (err) {
     console.error('❌ Error carregant dades de l\'API:', err.message);
     // Fallback: continua amb les dades hardcoded que ja hi ha a l'HTML
