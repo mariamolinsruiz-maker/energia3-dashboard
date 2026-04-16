@@ -2179,12 +2179,9 @@ comm.total_kw = commClients.reduce((s, c) => s + c.kw, 0);
 showToast('✅ Participant afegit correctament');
 }
 
-closeModal('modal-client');
-// Re-render detail if we're on it
-if (currentView === 'comunitat-detail' && currentCommunity === editingClientCommId) {
-renderCommunityDetail(editingClientCommId);
+if (currentView === 'clients') {
+  renderClientsTable();
 }
-renderClientsTable();
 }
 
 // ─────────────────────────────────────────────
@@ -2207,10 +2204,9 @@ const commClients = CLIENTS.filter(c => c.comunitat === comm.id);
 comm.total_kw = commClients.reduce((s, c) => s + c.kw, 0);
 }
 showToast('🗑 Participant eliminat');
-if (currentView === 'comunitat-detail' && currentCommunity === cl.comunitat) {
-renderCommunityDetail(cl.comunitat);
+if (currentView === 'clients') {
+  renderClientsTable();
 }
-renderClientsTable();
 }
 );
 }
@@ -2228,8 +2224,13 @@ if (comm) renderCommunityDetail(currentCommunity);
 else navigate('comunitats');
 }
 // Sync dashboard community filter select
-const sel = document.getElementById('filter-comm-clients');
-if (sel) {
+if (currentView === 'clients') {
+  const sel = document.getElementById('filter-comm-clients');
+  if (sel) {
+    sel.innerHTML = ...
+  }
+}
+  if (sel) {
 sel.innerHTML = '<option value="">Totes les comunitats</option>' +
 COMMUNITIES.map(c => `<option value="${c.id}">${c.nom} (${c.id})</option>`).join('');
 }
