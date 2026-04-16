@@ -41,13 +41,19 @@ async function loadFromAPI() {
     const [communities, clients] = await Promise.all([
       apiFetch('/api/communities'),
       apiFetch('/api/clients'),
+      apiFetch('/api/agreements'),
+      apiFetch('/api/incidents'),
     ]);
 
     // Buidar les arrays globals declarades a l'HTML
     COMMUNITIES.length = 0;
     CLIENTS.length = 0;
+    AGREEMENTS.length = 0;
+    INCIDENTS.length = 0;
 
     // Omplir amb les dades de l'API
+    communities.forEach(c => COMMUNITIES.push(c));
+    clients.forEach(c => CLIENTS.push(c));
     communities.forEach(c => COMMUNITIES.push(c));
     clients.forEach(c => CLIENTS.push(c));
 
