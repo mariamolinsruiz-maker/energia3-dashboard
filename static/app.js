@@ -93,19 +93,22 @@ async function loadFromAPI() {
     if (elKW) elKW.textContent = totalKW.toFixed(1) + ' kW';
 
     // ── TOTAL COMUNITATS (a la pantalla de Clients) ──
-    const elClientsComms = document.getElementById('kpi-clients-comms');
-    if (elClientsComms) {
-      const total = new Set((CLIENTS || []).map(c => c.comunitat)).size;
-      elClientsComms.textContent = total;
+// ── TOTAL COMUNITATS (a la pantalla de Clients) ──
+const elClientsComms = document.getElementById('kpi-clients-comms');
+if (elClientsComms) {
+  const total = new Set((CLIENTS || []).map(c => c.comunitat)).size;
+  elClientsComms.textContent = total;
+}
 
-    // ── DROPDOWN COMUNITATS (Clients) ──
-      const sel = document.getElementById('filter-comm-clients');
-      if (sel) {
-        sel.innerHTML =
-          '<option value="">Totes les comunitats</option>' +
-          COMMUNITIES.map(c => `<option value="${c.id}">${c.nom} (${c.id})</option>`).join('');
-      }  
-    }
+// ── DROPDOWN NOMÉS A CLIENTS ──
+if (typeof currentView !== 'undefined' && currentView === 'clients') {
+  const sel = document.getElementById('filter-comm-clients');
+  if (sel) {
+    sel.innerHTML =
+      '<option value="">Totes les comunitats</option>' +
+      COMMUNITIES.map(c => `<option value="${c.id}">${c.nom} (${c.id})</option>`).join('');
+  }
+}
   
   } catch (err) {
     console.error('❌ Error carregant dades de l\'API:', err.message);
