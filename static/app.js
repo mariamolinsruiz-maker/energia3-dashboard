@@ -42,7 +42,7 @@ async function loadFromAPI() {
   _dataLoaded = true;
   try {
     // Fetch en paral·lel
-    const [communities, clients] = await Promise.all([
+    const [communities, clients, agreements, incidents] = await Promise.all([
       apiFetch('/api/communities'),
       apiFetch('/api/clients'),
       apiFetch('/api/agreements'),
@@ -58,12 +58,12 @@ async function loadFromAPI() {
     // Omplir amb les dades de l'API
     communities.forEach(c => COMMUNITIES.push(c));
     clients.forEach(c => CLIENTS.push(c));
-    communities.forEach(c => COMMUNITIES.push(c));
-    clients.forEach(c => CLIENTS.push(c));
+    agreements.forEach(a => AGREEMENTS.push(a));
+    incidents.forEach(i => INCIDENTS.push(i));
 
     // Re-renderitzar tot el frontend amb les noves dades
-    navigate('dashboard');
-  
+    reloadCurrentView && reloadCurrentView();
+    
     console.log(
       `✅ Dades carregades: ${COMMUNITIES.length} comunitats, ${CLIENTS.length} clients`
     );
