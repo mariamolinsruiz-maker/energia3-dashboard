@@ -16,6 +16,8 @@
 //  Helpers per cridar l'API
 // ─────────────────────────────────────────────────────────────
 
+let _dataLoaded = false;
+
 async function apiFetch(path, method = 'GET', body = undefined) {
   const opts = {
     method,
@@ -36,6 +38,8 @@ async function apiFetch(path, method = 'GET', body = undefined) {
 // ─────────────────────────────────────────────────────────────
 
 async function loadFromAPI() {
+  if (_dataLoaded) return;
+  _dataLoaded = true;
   try {
     // Fetch en paral·lel
     const [communities, clients] = await Promise.all([
@@ -46,10 +50,10 @@ async function loadFromAPI() {
     ]);
 
     // Buidar les arrays globals declarades a l'HTML
-    COMMUNITIES.length = 0;
-    CLIENTS.length = 0;
-    AGREEMENTS.length = 0;
-    INCIDENTS.length = 0;
+    COMMUNITIES.splice(0, COMMUNITIES.length);
+    CLIENTS.splice(0, CLIENTS.length);
+    AGREEMENTS.splice(0, AGREEMENTS.length);
+    INCIDENTS.splice(0, INCIDENTS.length);
 
     // Omplir amb les dades de l'API
     communities.forEach(c => COMMUNITIES.push(c));
