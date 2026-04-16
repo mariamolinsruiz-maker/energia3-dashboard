@@ -321,6 +321,39 @@ window.deleteClient = async function (codi, event) {
   );
 };
 
+// ─────────────────────────────────────────────
+// STATS GLOBALS (calculats des de Supabase)
+// ─────────────────────────────────────────────
+
+function getClientsByCommunity(commId) {
+  return CLIENTS.filter(c => c.comunitat === commId);
+}
+
+function getAgreementsStats() {
+  return {
+    total: AGREEMENTS.length,
+    pendents: AGREEMENTS.filter(a => a.estat !== 'Firmat').length,
+    comunitats: new Set(AGREEMENTS.map(a => a.comunitat_id)).size,
+    firmants: AGREEMENTS.length
+  };
+}
+
+function getIncidentsStats() {
+  const totalActives = COMMUNITIES.length;
+  const ambErrors = new Set(INCIDENTS.map(i => i.comunitat_id)).size;
+  const senseErrors = totalActives - ambErrors;
+
+  return { totalActives, ambErrors, senseErrors };
+}
+
+function getIncidentsByType() {
+  const map = {};
+  INCIDENTS.forEach(i => {
+    const tipus = i.tipus || 'Altres';
+    map[tipus] = (map[tipus] || 0) + 1;
+  });
+  return map;
+}
 
 // ─────────────────────────────────────────────────────────────
 //  Punt d'entrada: carregar dades quan el DOM estigui llest
