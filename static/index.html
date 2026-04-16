@@ -1633,7 +1633,6 @@ if (sel && sel.options.length <= 1) {
       `<option value="${c.id}">${c.nom} (${c.id})</option>`
     ).join('');
 }
-const sel = document.getElementById('filter-comm-clients');
 const cf = communityFilter ?? sel?.value ?? '';
 const data = cf ? CLIENTS.filter(c => c.comunitat === cf) : CLIENTS;
 const tbody = document.getElementById('clients-tbody');
