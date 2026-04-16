@@ -2061,7 +2061,7 @@ const comm = COMMUNITIES.find(c => c.id === id);
 if (!comm) return;
 showConfirm(
 'Eliminar comunitat',
-`Segur que vols eliminar "${comm.nom}" i tots els seus clients (${comm.total_clients})? Aquesta acció no es pot desfer.`,
+`Segur que vols eliminar "${comm.nom}" i tots els seus clients (${getClientsByCommunity(comm.id).length})? Aquesta acció no es pot desfer.`,
 () => {
 const idx = COMMUNITIES.findIndex(c => c.id === id);
 if (idx > -1) COMMUNITIES.splice(idx, 1);
@@ -2159,7 +2159,7 @@ CLIENTS.push(newCl);
 const comm = COMMUNITIES.find(c => c.id === editingClientCommId);
 if (comm) {
 const commClients = CLIENTS.filter(c => c.comunitat === editingClientCommId);
-comm.total_clients = commClients.length;
+getClientsByCommunity(comm.id).length = commClients.length;
 comm.total_kw = commClients.reduce((s, c) => s + c.kw, 0);
 }
 showToast('✅ Participant afegit correctament');
@@ -2190,7 +2190,7 @@ if (idx > -1) CLIENTS.splice(idx, 1);
 const comm = COMMUNITIES.find(c => c.id === cl.comunitat);
 if (comm) {
 const commClients = CLIENTS.filter(c => c.comunitat === comm.id);
-comm.total_clients = commClients.length;
+getClientsByCommunity(comm.id).length = commClients.length;
 comm.total_kw = commClients.reduce((s, c) => s + c.kw, 0);
 }
 showToast('🗑 Participant eliminat');
