@@ -1749,7 +1749,8 @@ setTimeout(() => { btn.textContent = '🔄 Actualitzar'; }, 1200);
 // ═══════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+await loadDataFromSupabase();
 navigate('dashboard');
 renderClientsTable();
 });
@@ -2231,6 +2232,52 @@ document.getElementById('confirm-overlay').addEventListener('click', e => {
 if (e.target === document.getElementById('confirm-overlay')) closeConfirm();
 });
 
+function renderAcords() {
+  const tbody = document.getElementById('acords-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = AGREEMENTS.map(a => `
+    <tr>
+      <td><strong>${a.comunitat_id}</strong></td>
+      <td>${a.nom_document}</td>
+      <td>—</td>
+      <td>—</td>
+      <td class="mono">${a.data_creacio || ''}</td>
+      <td><button class="btn btn-ghost btn-sm">Veure</button></td>
+    </tr>
+  `).join('');
+}
+
+function renderIncidents() {
+  const tbody = document.getElementById('incidents-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = INCIDENTS.map(i => `
+    <tr>
+      <td><strong>${i.comunitat_id}</strong></td>
+      <td>${i.client_nom || ''}</td>
+      <td>${i.cups || ''}</td>
+      <td><span class="chip-warn">${i.tipus}</span></td>
+      <td style="max-width:220px;white-space:normal;">${i.descripcio}</td>
+      <td class="mono">${i.dies_sense_dades ?? '—'}</td>
+      <td class="mono">${i.data_deteccio || ''}</td>
+      <td><span class="chip-pend">${i.estat}</span></td>
+      <td><button class="btn btn-ghost btn-sm">✉ Contactar</button></td>
+    </tr>
+  `).join('');
+}
+
+  async function loadDataFromSupabase() {
+    const { data: comms } = await supabase.from('communities').select('*');
+    if (comms) COMMUNITIES = comms;
+    const { data: clients } = await supabase.from('clients').select('*');
+    if (clients) CLIENTS = clients;
+    const { data: agreements } = await supabase.from('agreements').select('*');
+    if (agreements) AGREEMENTS = agreements;
+    const { data: incidents } = await supabase.from('incidents').select('*');
+    if (incidents) INCIDENTS = incidents;
+  }
+  
 </script>
 
 <!-- ═══════════════════════════════════════════
@@ -2473,42 +2520,7 @@ Si deixes el CUPS buit es marcarà com "Pendent d'autoritzar". Pots editar les d
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-</body>
 
 
-function renderAcords() {
-  const tbody = document.getElementById('acords-tbody');
-  if (!tbody) return;
-
-  tbody.innerHTML = AGREEMENTS.map(a => `
-    <tr>
-      <td><strong>${a.comunitat_id}</strong></td>
-      <td>${a.nom_document}</td>
-      <td>—</td>
-      <td>—</td>
-      <td class="mono">${a.data_creacio || ''}</td>
-      <td><button class="btn btn-ghost btn-sm">Veure</button></td>
-    </tr>
-  `).join('');
-}
-
-function renderIncidents() {
-  const tbody = document.getElementById('incidents-tbody');
-  if (!tbody) return;
-
-  tbody.innerHTML = INCIDENTS.map(i => `
-    <tr>
-      <td><strong>${i.comunitat_id}</strong></td>
-      <td>${i.client_nom || ''}</td>
-      <td>${i.cups || ''}</td>
-      <td><span class="chip-warn">${i.tipus}</span></td>
-      <td style="max-width:220px;white-space:normal;">${i.descripcio}</td>
-      <td class="mono">${i.dies_sense_dades ?? '—'}</td>
-      <td class="mono">${i.data_deteccio || ''}</td>
-      <td><span class="chip-pend">${i.estat}</span></td>
-      <td><button class="btn btn-ghost btn-sm">✉ Contactar</button></td>
-    </tr>
-  `).join('');
-}
-
+  </body>
   </html>
