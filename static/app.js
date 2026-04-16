@@ -97,6 +97,14 @@ async function loadFromAPI() {
     if (elClientsComms) {
       const total = new Set((CLIENTS || []).map(c => c.comunitat)).size;
       elClientsComms.textContent = total;
+
+    // ── DROPDOWN COMUNITATS (Clients) ──
+      const sel = document.getElementById('filter-comm-clients');
+      if (sel) {
+        sel.innerHTML =
+          '<option value="">Totes les comunitats</option>' +
+          COMMUNITIES.map(c => `<option value="${c.id}">${c.nom} (${c.id})</option>`).join('');
+      }  
     }
   
   } catch (err) {
