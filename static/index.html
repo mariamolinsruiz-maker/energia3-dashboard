@@ -1739,10 +1739,31 @@ function refreshData() {
   setTimeout(() => { btn.textContent = '🔄 Actualitzar'; }, 1200);
 }
 
+ async function loadDataFromSupabase() {
+  // COMMUNITIES
+  const { data: comms, error: err1 } = await supabase
+    .from('communities')
+    .select('*');
+
+  if (!err1 && comms) {
+    COMMUNITIES = comms;
+  }
+
+  // CLIENTS
+  const { data: clients, error: err2 } = await supabase
+    .from('clients')
+    .select('*');
+
+  if (!err2 && clients) {
+    CLIENTS = clients;
+  }
+}
+  
 // ═══════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadDataFromSupabase();
   navigate('dashboard');
   renderClientsTable();
 });
@@ -2019,25 +2040,70 @@ function saveComm() {
   commObj.total_kw      = newClients.reduce((s, c) => s + c.kw, 0) || potencia;
 
   if (editingCommId) {
-    // UPDATE
-    const idx = COMMUNITIES.findIndex(c => c.id === editingCommId);
-    if (idx > -1) COMMUNITIES[idx] = { ...COMMUNITIES[idx], ...commObj };
-    // Remove old clients and add new ones
-    COMMUNITIES[idx].total_clients = newClients.length;
-    const otherClients = CLIENTS.filter(c => c.comunitat !== editingCommId);
-    CLIENTS.length = 0;
-    otherClients.concat(newClients).forEach(c => CLIENTS.push(c));
-    showToast('✅ Comunitat actualitzada correctament');
-  } else {
-    // CREATE
-    COMMUNITIES.push(commObj);
-    newClients.forEach(c => CLIENTS.push(c));
-    showToast('✅ Comunitat creada correctament');
+  // UPDATE comunitat a Supabase
+  const { error: errUpdate } = await supabase
+    .from('communities')
+    .update(commObj)
+    .eq('id', editingCommId);
+  if (errUpdate) {
+    console.error(errUpdate);
+    showToast('❌ Error actualitzant comunitat');
+    return;
   }
 
-  closeModal('modal-comm');
-  reloadCurrentView();
+  // DELETE clients antics
+  const { error: errDelete } = await supabase
+    .from('clients')
+    .delete()
+    .eq('comunitat', editingCommId);
+  if (errDelete) {
+    console.error(errDelete);
+    showToast('❌ Error eliminant clients antics');
+    return;
+  }
+
+  // INSERT nous clients
+  if (newClients.length > 0) {
+    const { error: errInsert } = await supabase
+      .from('clients')
+      .insert(newClients);
+
+    if (errInsert) {
+      console.error(errInsert);
+      showToast('❌ Error inserint clients');
+      return;
+    }
+  }
+  showToast('✅ Comunitat actualitzada correctament');
+} else {
+  // CREATE comunitat
+  const { error: errCreate } = await supabase
+    .from('communities')
+    .insert([commObj]);
+
+  if (errCreate) {
+    console.error(errCreate);
+    showToast('❌ Error creant comunitat');
+    return;
+  }
+
+  // INSERT clients
+  if (newClients.length > 0) {
+    const { error: errInsert } = await supabase
+      .from('clients')
+      .insert(newClients);
+    if (errInsert) {
+      console.error(errInsert);
+      showToast('❌ Error inserint clients');
+      return;
+    }
+  }
+  showToast('✅ Comunitat creada correctament');
 }
+
+// Refresc UI
+closeModal('modal-comm');
+reloadCurrentView();
 
 function nextClientCodi_seq(commId, n) {
   const prefix = commId.replace('C', '');
@@ -2174,7 +2240,7 @@ async function saveClient() {
 // ─────────────────────────────────────────────
 //  ELIMINAR CLIENT
 // ─────────────────────────────────────────────
-function deleteClient(codi, event) {
+async function deleteClient(codi, event) {
   if (event) event.stopPropagation();
   const cl = CLIENTS.find(c => c.codi === codi);
   if (!cl) return;
@@ -2182,6 +2248,8 @@ function deleteClient(codi, event) {
     'Eliminar participant',
     `Segur que vols eliminar "${cl.nom}"?`,
     () => {
+      await supabase.from('clients').delete().eq('codi', codi);
+      
       const idx = CLIENTS.findIndex(c => c.codi === codi);
       if (idx > -1) CLIENTS.splice(idx, 1);
       // Update community totals
