@@ -91,6 +91,13 @@ async function loadFromAPI() {
     const totalKW = CLIENTS.reduce((sum, c) => sum + (c.kw || 0), 0);
     const elKW = document.getElementById('kpi-dashboard-kw');
     if (elKW) elKW.textContent = totalKW.toFixed(1) + ' kW';
+
+    // ── TOTAL COMUNITATS (a la pantalla de Clients) ──
+    const elClientsComms = document.getElementById('kpi-clients-comms');
+    if (elClientsComms) {
+      const total = new Set((CLIENTS || []).map(c => c.comunitat)).size;
+      elClientsComms.textContent = total;
+    }
   
   } catch (err) {
     console.error('❌ Error carregant dades de l\'API:', err.message);
