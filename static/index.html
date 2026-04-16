@@ -2023,7 +2023,6 @@ dades_recents: 'Sense dades', sense_auto: 'OK'
 });
 });
 
-commObj.total_clients = newClients.length;
 commObj.total_kw      = newClients.reduce((s, c) => s + c.kw, 0) || potencia;
 
 if (editingCommId) {
@@ -2031,7 +2030,6 @@ if (editingCommId) {
 const idx = COMMUNITIES.findIndex(c => c.id === editingCommId);
 if (idx > -1) COMMUNITIES[idx] = { ...COMMUNITIES[idx], ...commObj };
 // Remove old clients and add new ones
-COMMUNITIES[idx].total_clients = newClients.length;
 const otherClients = CLIENTS.filter(c => c.comunitat !== editingCommId);
 CLIENTS.length = 0;
 otherClients.concat(newClients).forEach(c => CLIENTS.push(c));
@@ -2190,7 +2188,6 @@ if (idx > -1) CLIENTS.splice(idx, 1);
 const comm = COMMUNITIES.find(c => c.id === cl.comunitat);
 if (comm) {
 const commClients = CLIENTS.filter(c => c.comunitat === comm.id);
-getClientsByCommunity(comm.id).length = commClients.length;
 comm.total_kw = commClients.reduce((s, c) => s + c.kw, 0);
 }
 showToast('🗑 Participant eliminat');
