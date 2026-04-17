@@ -872,8 +872,17 @@ Mostrant 2 de 2 resultats
 <div class="card-header">
 <span class="card-title">⚠️ Llista d'incidències actives</span>
 <div style="display:flex;gap:6px;">
-<select class="sel" style="font-size:0.78rem;">
-<option>Tots</option><option>Falta dades</option><option>Sense generació</option><option>Baixada considerable</option><option>Múltiple</option>
+<select 
+  class="sel" 
+  id="filter-incidents" 
+  onchange="renderIncidents()" 
+  style="font-size:0.78rem;"
+>
+  <option value="tots">Tots</option>
+  <option value="falta_dades">Falta dades</option>
+  <option value="sense_gen">Sense generació</option>
+  <option value="baixada">Baixada considerable</option>
+  <option value="multiple">Múltiple</option>
 </select>
 <button class="btn btn-export btn-sm">⬇ Exportar CSV</button>
 </div>
