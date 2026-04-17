@@ -42,12 +42,13 @@ async function loadFromAPI() {
   _dataLoaded = true;
   try {
     // Fetch en paral·lel
-    const [communities, clients, agreements, incidents] = await Promise.all([
+    const [communities, clients] = await Promise.all([
       apiFetch('/api/communities'),
       apiFetch('/api/clients'),
-      apiFetch('/api/agreements'),
-      apiFetch('/api/incidents'),
     ]);
+    
+    const agreements = [];
+    const incidents = [];
 
     // Buidar les arrays globals declarades a l'HTML
     COMMUNITIES.splice(0, COMMUNITIES.length);
@@ -67,11 +68,17 @@ async function loadFromAPI() {
     console.log(
       `✅ Dades carregades: ${COMMUNITIES.length} comunitats, ${CLIENTS.length} clients`
     );
-    const statsA = getAgreementsStats();
+    let statsA = { pendents: 0 };
+    if (typeof getAgreementsStats === 'function') {
+      statsA = getAgreementsStats();
+    }
     const badgeA = document.getElementById('badge-acords');
     if (badgeA) badgeA.textContent = statsA.pendents;
-
-    const statsI = getIncidentsStats();
+    
+    let statsI = { ambErrors: 0 };
+    if (typeof getIncidentsStats === 'function') {
+      statsI = getIncidentsStats();
+    }
     const badgeE = document.getElementById('badge-errors');
     if (badgeE) badgeE.textContent = statsI.ambErrors;
 
