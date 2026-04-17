@@ -126,6 +126,8 @@ if (elPercent) {
   elPercent.textContent = percent.toFixed(1).replace('.', ',') + '%';
 }
 
+updateIncidentTypeCounters();
+
 // badge sidebar
     if (elETotal) elETotal.textContent = statsI.totalActives;
     if (elEAmb)   elEAmb.textContent   = statsI.ambErrors;
@@ -459,6 +461,29 @@ function getIncidentsByType() {
     map[tipus] = (map[tipus] || 0) + 1;
   });
   return map;
+}
+
+function updateIncidentTypeCounters() {
+  const pendents = INCIDENTS.filter(i =>
+    (i.estat || '').toLowerCase() === 'pendent'
+  );
+
+  const counts = {
+    falta_dades: pendents.filter(i => i.tipus === 'falta_dades').length,
+    sense_gen:   pendents.filter(i => i.tipus === 'sense_gen').length,
+    baixada:     pendents.filter(i => i.tipus === 'baixada').length,
+    multiple:    pendents.filter(i => i.tipus === 'multiple').length
+  };
+
+  const el1 = document.getElementById('count-falta-dades');
+  const el2 = document.getElementById('count-sense-gen');
+  const el3 = document.getElementById('count-baixada');
+  const el4 = document.getElementById('count-multiple');
+
+  if (el1) el1.textContent = counts.falta_dades;
+  if (el2) el2.textContent = counts.sense_gen;
+  if (el3) el3.textContent = counts.baixada;
+  if (el4) el4.textContent = counts.multiple;
 }
 
 // ─────────────────────────────────────────────────────────────
