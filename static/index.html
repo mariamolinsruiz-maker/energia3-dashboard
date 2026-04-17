@@ -919,6 +919,7 @@ let mapDashboard = null;
 let mapDetail = null;
 const detailMaps = {};
 let charts = {};
+let currentIncidentType = null;
 
 // ═══════════════════════════════════════════
 //  NAVIGATION
@@ -1751,12 +1752,22 @@ if (eEl) eEl.value = end;
 }
 
 function selectIncidentType(el, type) {
-document.querySelectorAll('.incident-type-item').forEach(item => {
-item.style.background='';item.style.borderColor='var(--border)';
-item.querySelector('div div:first-child').style.color='';
-});
-el.style.background='var(--red-bg)';el.style.borderColor='var(--red)';
-el.querySelector('div div:first-child').style.color='var(--red)';
+  // 🔥 guardar filtre (CLAU)
+  currentIncidentType = type;
+
+  // UI (el teu codi intacte)
+  document.querySelectorAll('.incident-type-item').forEach(item => {
+    item.style.background='';
+    item.style.borderColor='var(--border)';
+    item.querySelector('div div:first-child').style.color='';
+  });
+
+  el.style.background='var(--red-bg)';
+  el.style.borderColor='var(--red)';
+  el.querySelector('div div:first-child').style.color='var(--red)';
+
+  // 🔥 re-renderitzar taula (CLAU)
+  renderIncidents();
 }
 
 function refreshData() {
@@ -2303,7 +2314,16 @@ function renderIncidents() {
   const tbody = document.getElementById('incidents-tbody');
   if (!tbody) return;
 
-  tbody.innerHTML = INCIDENTS.map(i => `
+  let data = INCIDENTS;
+
+  // 🔥 FILTRE (CLAU)
+  if (currentIncidentType) {
+    data = INCIDENTS.filter(i =>
+      (i.tipus || '').toLowerCase().replace(/\s+/g, '_') === currentIncidentType
+    );
+  }
+
+  tbody.innerHTML = data.map(i => `
     <tr>
       <td><strong>${i.comunitat}</strong></td>
       <td>${i.client_nom || ''}</td>
