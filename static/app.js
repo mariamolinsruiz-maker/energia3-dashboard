@@ -63,8 +63,12 @@ async function loadFromAPI() {
     // Omplir amb les dades de l'API
     communities.forEach(c => COMMUNITIES.push(c));
     clients.forEach(c => CLIENTS.push(c));
-    agreements.forEach(a => AGREEMENTS.push(a));
-    incidents.forEach(i => INCIDENTS.push(i));
+    if (typeof AGREEMENTS !== 'undefined') {
+      agreements.forEach(a => AGREEMENTS.push(a));
+    }
+    if (typeof INCIDENTS !== 'undefined') {
+      incidents.forEach(i => INCIDENTS.push(i));
+    }
 
     // Re-renderitzar tot el frontend amb les noves dades
     reloadCurrentView && reloadCurrentView();
