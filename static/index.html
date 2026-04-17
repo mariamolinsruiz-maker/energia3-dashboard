@@ -2248,9 +2248,13 @@ overlay.addEventListener('click', e => {
 if (e.target === overlay) overlay.classList.remove('open');
 });
 });
-document.getElementById('confirm-overlay').addEventListener('click', e => {
-if (e.target === document.getElementById('confirm-overlay')) closeConfirm();
-});
+const confirmOverlay = document.getElementById('confirm-overlay');
+
+if (confirmOverlay) {
+  confirmOverlay.addEventListener('click', e => {
+    if (e.target === confirmOverlay) closeConfirm();
+  });
+}
 
 function renderAcords() {
   const tbody = document.getElementById('acords-tbody');
