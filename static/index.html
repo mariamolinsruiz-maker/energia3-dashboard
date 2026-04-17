@@ -846,21 +846,21 @@ Mostrant 2 de 2 resultats
 <div class="card-body">
 <p style="font-size:0.82rem;color:var(--text-light);margin-bottom:1rem;">Selecciona un tipus per veure el detall de les comunitats afectades.</p>
 <div style="display:flex;flex-direction:column;gap:0.5rem;" id="incident-type-list">
-<div class="incident-type-item active" onclick="selectIncidentType(this,'falta_dades')" style="border:1px solid var(--red);border-radius:var(--radius-sm);padding:0.7rem 1rem;cursor:pointer;background:var(--red-bg);display:flex;justify-content:space-between;align-items:center;">
+<div class="incident-type-item active" style="border:1px solid var(--red);border-radius:var(--radius-sm);padding:0.7rem 1rem;cursor:pointer;background:var(--red-bg);display:flex;justify-content:space-between;align-items:center;">
 <div><div style="font-weight:600;font-size:0.85rem;color:var(--red)">Falta dades</div><div style="font-size:0.75rem;color:var(--text-light);margin-top:1px;">CUPS sense registres en els últims N dies</div></div>
-<span style="background:var(--red);color:#fff;border-radius:20px;padding:2px 8px;font-size:0.72rem;font-weight:700">2</span>
+<span id="count-falta-dades" style="background:var(--red);color:#fff;border-radius:20px;padding:2px 8px;font-size:0.72rem;font-weight:700">0</span>
 </div>
-<div class="incident-type-item" onclick="selectIncidentType(this,'sense_gen')" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.7rem 1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+<div class="incident-type-item"  style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.7rem 1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
 <div><div style="font-weight:600;font-size:0.85rem;">Sense generació</div><div style="font-size:0.75rem;color:var(--text-light);margin-top:1px;">Dades recents però valor de generació = 0</div></div>
-<span style="background:var(--border);color:var(--text-light);border-radius:20px;padding:2px 8px;font-size:0.72rem;font-weight:700">0</span>
+<span id="count-sense-gen" style="background:var(--border);color:var(--text-light);border-radius:20px;padding:2px 8px;font-size:0.72rem;font-weight:700">0</span>
 </div>
-<div class="incident-type-item" onclick="selectIncidentType(this,'baixada')" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.7rem 1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+<div class="incident-type-item" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.7rem 1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
 <div><div style="font-weight:600;font-size:0.85rem;">Baixada considerable</div><div style="font-size:0.75rem;color:var(--text-light);margin-top:1px;">Baixada significativa vs. setmana anterior</div></div>
-<span style="background:var(--border);color:var(--text-light);border-radius:20px;padding:2px 8px;font-size:0.72rem;font-weight:700">0</span>
+<span id="count-baixada" style="background:var(--border);color:var(--text-light);border-radius:20px;padding:2px 8px;font-size:0.72rem;font-weight:700">0</span>
 </div>
-<div class="incident-type-item" onclick="selectIncidentType(this,'multiple')" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.7rem 1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+<div class="incident-type-item" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.7rem 1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
 <div><div style="font-weight:600;font-size:0.85rem;">Múltiple</div><div style="font-size:0.75rem;color:var(--text-light);margin-top:1px;">Comunitats amb múltiples tipus de problemes</div></div>
-<span style="background:var(--border);color:var(--text-light);border-radius:20px;padding:2px 8px;font-size:0.72rem;font-weight:700">1</span>
+<span id="count-multiple" style="background:var(--border);color:var(--text-light);border-radius:20px;padding:2px 8px;font-size:0.72rem;font-weight:700">0</span>
 </div>
 </div>
 </div>
