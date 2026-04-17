@@ -387,14 +387,14 @@ function getAgreementsStats() {
   return {
     total: AGREEMENTS.length,
     pendents: AGREEMENTS.filter(a => a.estat !== 'Firmat').length,
-    comunitats: new Set(AGREEMENTS.map(a => a.comunitat_id)).size,
+    comunitats: new Set(AGREEMENTS.map(a => a.comunitat)).size,
     firmants: AGREEMENTS.length
   };
 }
 
 function getIncidentsStats() {
   const totalActives = COMMUNITIES.length;
-  const ambErrors = new Set(INCIDENTS.map(i => i.comunitat_id)).size;
+  const ambErrors = new Set(INCIDENTS.map(i => i.comunitat)).size;
   const senseErrors = totalActives - ambErrors;
 
   return { totalActives, ambErrors, senseErrors };
