@@ -2256,7 +2256,7 @@ function renderAcords() {
 
   tbody.innerHTML = AGREEMENTS.map(a => `
     <tr>
-      <td><strong>${a.comunitat_id}</strong></td>
+      <td><strong>${a.comunitat}</strong></td>
       <td>${a.nom_document}</td>
       <td>—</td>
       <td>—</td>
@@ -2272,7 +2272,7 @@ function renderIncidents() {
 
   tbody.innerHTML = INCIDENTS.map(i => `
     <tr>
-      <td><strong>${i.comunitat_id}</strong></td>
+      <td><strong>${i.comunitat}</strong></td>
       <td>${i.client_nom || ''}</td>
       <td>${i.cups || ''}</td>
       <td><span class="chip-warn">${i.tipus}</span></td>
