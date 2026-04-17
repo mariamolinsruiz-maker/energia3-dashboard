@@ -87,6 +87,18 @@ async function loadFromAPI() {
     if (typeof getAgreementsStats === 'function') {
       statsA = getAgreementsStats();
     }
+
+    // KPIs Acords (pantalla acords)
+    const elATotal = document.getElementById('kpi-acords-total');
+    const elAPend  = document.getElementById('kpi-acords-pendents');
+    const elAComm  = document.getElementById('kpi-acords-comunitats');
+    const elAFirm  = document.getElementById('kpi-acords-firmants');
+    
+    if (elATotal) elATotal.textContent = statsA.total;
+    if (elAPend)  elAPend.textContent  = statsA.pendents;
+    if (elAComm)  elAComm.textContent  = statsA.comunitats;
+    if (elAFirm)  elAFirm.textContent  = statsA.firmants;
+    
     const badgeA = document.getElementById('badge-acords');
     if (badgeA) badgeA.textContent = statsA.pendents;
     
@@ -94,6 +106,16 @@ async function loadFromAPI() {
     if (typeof getIncidentsStats === 'function') {
       statsI = getIncidentsStats();
     }
+
+    // KPIs Errors (pantalla errors)
+    const elETotal = document.getElementById('kpi-errors-total');
+    const elEAmb   = document.getElementById('kpi-errors-amb');
+    const elESense = document.getElementById('kpi-errors-sense');
+    
+    if (elETotal) elETotal.textContent = statsI.totalActives;
+    if (elEAmb)   elEAmb.textContent   = statsI.ambErrors;
+    if (elESense) elESense.textContent = statsI.senseErrors;
+    
     const badgeE = document.getElementById('badge-errors');
     if (badgeE) badgeE.textContent = statsI.ambErrors;
 
