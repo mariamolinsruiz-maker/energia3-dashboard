@@ -42,13 +42,12 @@ async function loadFromAPI() {
   _dataLoaded = true;
   try {
     // Fetch en paral·lel
-    const [communities, clients] = await Promise.all([
+    const [communities, clients, agreements, incidents] = await Promise.all([
       apiFetch('/api/communities'),
       apiFetch('/api/clients'),
+      apiFetch('/api/agreements'),
+      apiFetch('/api/incidents'),
     ]);
-    
-    const agreements = [];
-    const incidents = [];
 
     // Buidar les arrays globals declarades a l'HTML
     COMMUNITIES.splice(0, COMMUNITIES.length);
