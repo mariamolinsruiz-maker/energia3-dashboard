@@ -1823,10 +1823,14 @@ function closeConfirm() {
 document.getElementById('confirm-overlay').classList.remove('open');
 confirmCallback = null;
 }
-document.getElementById('confirm-ok-btn').onclick = () => {
-if (confirmCallback) confirmCallback();
-closeConfirm();
-};
+const confirmBtn = document.getElementById('confirm-ok-btn');
+
+if (confirmBtn) {
+  confirmBtn.onclick = () => {
+    if (confirmCallback) confirmCallback();
+    closeConfirm();
+  };
+}
 
 // ─────────────────────────────────────────────
 //  COMUNITAT: OBRIR MODAL (nova o editar)
