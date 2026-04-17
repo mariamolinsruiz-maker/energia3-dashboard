@@ -679,72 +679,69 @@ transition:color .15s;
         VIEW: CLIENTS (global)
    ══════════════════════════════════════ -->
 <div id="view-clients" class="view anim">
-<div class="page-header-row">
-<div class="page-header" style="margin-bottom:0">
-<h1>Clients</h1>
-<p>Llistat i estat de tots els clients</p>
-</div>
-<div style="display:flex;gap:0.5rem;align-items:center;">
-  <select id="filter-comm-clients" class="sel" onchange="renderClientsTable()">
-    <option value="">Totes les comunitats</option>
-  </select>
+  <div class="page-header-row">
+    <div class="page-header" style="margin-bottom:0">
+      <h1>Clients</h1>
+      <p>Llistat i estat de tots els clients</p>
+    </div>
+    <div style="display:flex;gap:0.5rem;align-items:center;">
+      <select id="filter-comm-clients" class="sel" onchange="renderClientsTable()">
+        <option value="">Totes les comunitats</option>
+      </select>
+      <button class="btn btn-export btn-sm" onclick="exportClientsVisible()">⬇ Exportar CSV</button>
+    </div>
+    <button class="btn btn-export btn-sm" onclick="exportClientsVisible()">⬇ Exportar CSV</button>
+  </div>
+  
+  <!-- Clients KPIs -->
+  <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);max-width:600px;">
+    <div class="kpi accent">
+      <div class="kpi-val" id="stat-actius">2</div>
+      <div class="kpi-lbl">Clients actius</div>
+    </div>
+    <div class="kpi accent">
+      <div class="kpi-val" id="kpi-clients-comms">0</div>
+      <div class="kpi-lbl">Total comunitats</div>
+    </div>
+    <div class="kpi accent-gold">
+      <div class="kpi-val" id="stat-total-clients">15</div>
+      <div class="kpi-lbl">Clients totals</div>
+      <div class="kpi-sub">Totes les comunitats</div>
+    </div>
+  </div>
 
-  <button class="btn btn-export btn-sm" onclick="exportClientsVisible()">⬇ Exportar CSV</button>
-</div>
-<button class="btn btn-export btn-sm" onclick="exportClientsVisible()">⬇ Exportar CSV</button>
-</div>
-</div>
-
-<!-- Clients KPIs -->
-<div class="kpi-row" style="grid-template-columns:repeat(3,1fr);max-width:600px;">
-<div class="kpi accent">
-<div class="kpi-val" id="stat-actius">2</div>
-<div class="kpi-lbl">Clients actius</div>
-</div>
-<div class="kpi accent">
-<div class="kpi-val" id="kpi-clients-comms">0</div>
-<div class="kpi-lbl">Total comunitats</div>
-</div>
-<div class="kpi accent-gold">
-<div class="kpi-val" id="stat-total-clients">15</div>
-<div class="kpi-lbl">Clients totals</div>
-<div class="kpi-sub">Totes les comunitats</div>
-</div>
-</div>
-
-<div class="card">
-<div class="card-header">
-<span class="card-title">👥 Clients de la comunitat</span>
-<div style="display:flex;gap:6px;">
-<input type="text" class="search-box" placeholder="Cerca client, CUPS o NIF..." id="search-clients" oninput="filterClientsTable()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-family:Outfit,sans-serif;font-size:0.8rem;min-width:220px;">
-<button class="btn btn-export btn-sm">⬇ CSV</button>
-</div>
-</div>
-<div class="table-wrap">
-<table id="clients-table">
-<thead>
-<tr>
-<th>Codi Client</th>
-<th>Nom</th>
-<th>CUPS</th>
-<th>NIF</th>
-<th>Telèfon</th>
-<th>Email</th>
-<th>Inici Fact.</th>
-<th>Baixa</th>
-<th>App</th>
-<th>Estat</th>
-<th>Modalitat</th>
-<th>Perfil</th>
-<th>Comercialitz.</th>
-<th>Import</th>
-<th>Comunitat</th>
-</tr>
-</thead>
-<tbody id="clients-tbody"></tbody>
-</table>
-</div>
-</div>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">👥 Clients de la comunitat</span>
+      <div style="display:flex;gap:6px;">
+        <input type="text" class="search-box" placeholder="Cerca client, CUPS o NIF..." id="search-clients" oninput="filterClientsTable()" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-family:Outfit,sans-serif;font-size:0.8rem;min-width:220px;"><button class="btn btn-export btn-sm">⬇ CSV</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="clients-table">
+        <thead>
+          <tr>
+            <th>Codi Client</th>
+            <th>Nom</th>
+            <th>CUPS</th>
+            <th>NIF</th>
+            <th>Telèfon</th>
+            <th>Email</th>
+            <th>Inici Fact.</th>
+            <th>Baixa</th>
+            <th>App</th>
+            <th>Estat</th>
+            <th>Modalitat</th>
+            <th>Perfil</th>
+            <th>Comercialitz.</th>
+            <th>Import</th>
+            <th>Comunitat</th>
+          </tr>
+        </thead>
+        <tbody id="clients-tbody"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <!-- ══════════════════════════════════════
