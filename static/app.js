@@ -463,16 +463,23 @@ function getIncidentsByType() {
   return map;
 }
 
+function normalizeTipus(t) {
+  return (t || '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '_');
+}
+
 function updateIncidentTypeCounters() {
   const pendents = INCIDENTS.filter(i =>
     (i.estat || '').toLowerCase() === 'pendent'
   );
 
   const counts = {
-    falta_dades: pendents.filter(i => i.tipus === 'falta_dades').length,
-    sense_gen:   pendents.filter(i => i.tipus === 'sense_gen').length,
-    baixada:     pendents.filter(i => i.tipus === 'baixada').length,
-    multiple:    pendents.filter(i => i.tipus === 'multiple').length
+    falta_dades: pendents.filter(i => normalizeTipus(i.tipus) === 'falta_dades').length,
+    sense_gen:   pendents.filter(i => normalizeTipus(i.tipus) === 'sense_gen').length,
+    baixada:     pendents.filter(i => normalizeTipus(i.tipus) === 'baixada').length,
+    multiple:    pendents.filter(i => normalizeTipus(i.tipus) === 'multiple').length
   };
 
   const el1 = document.getElementById('count-falta-dades');
