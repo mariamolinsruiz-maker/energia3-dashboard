@@ -124,8 +124,7 @@ if (elClientsComms) {
 }
   
   } catch (err) {
-    console.error('❌ Error carregant dades de l\'API:', err.message);
-    // Fallback: continua amb les dades hardcoded que ja hi ha a l'HTML
+    console.error('❌ ERROR REAL:', err); // Fallback: continua amb les dades hardcoded que ja hi ha a l'HTML
   }
 }
 
