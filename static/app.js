@@ -72,6 +72,16 @@ async function loadFromAPI() {
     // Re-renderitzar tot el frontend amb les noves dades
     reloadCurrentView && reloadCurrentView();
 
+    if (typeof currentView !== 'undefined' && currentView === 'errors') {
+      const statsI = getIncidentsStats();
+      
+      const elETotal = document.getElementById('kpi-errors-total');
+      const elEAmb   = document.getElementById('kpi-errors-amb');
+      const elESense = document.getElementById('kpi-errors-sense');
+      if (elETotal) elETotal.textContent = statsI.totalActives;
+      if (elEAmb)   elEAmb.textContent   = statsI.ambErrors;
+      if (elESense) elESense.textContent = statsI.senseErrors;
+    }
     // ✅ dropdown segur (fora de problemes de scope)
     const dropdown = document.getElementById('filter-comm-clients');
     if (dropdown) {
