@@ -112,13 +112,12 @@ if (elClientsComms) {
 }
 
 // ── DROPDOWN NOMÉS A CLIENTS ──
-if (typeof currentView !== 'undefined' && currentView === 'clients') {
-  const sel = document.getElementById('filter-comm-clients');
-  if (sel) {
-    sel.innerHTML =
-      '<option value="">Totes les comunitats</option>' +
-      COMMUNITIES.map(c => `<option value="${c.id}">${c.nom} (${c.id})</option>`).join('');
-  }
+const sel = document.getElementById('filter-comm-clients');
+
+if (sel && typeof currentView !== 'undefined' && currentView === 'clients') {
+  sel.innerHTML =
+    '<option value="">Totes les comunitats</option>' +
+    COMMUNITIES.map(c => `<option value="${c.id}">${c.nom} (${c.id})</option>`).join('');
 }
   
   } catch (err) {
