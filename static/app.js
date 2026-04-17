@@ -68,6 +68,14 @@ async function loadFromAPI() {
 
     // Re-renderitzar tot el frontend amb les noves dades
     reloadCurrentView && reloadCurrentView();
+
+    // ✅ dropdown segur (fora de problemes de scope)
+    const dropdown = document.getElementById('filter-comm-clients');
+    if (dropdown) {
+      dropdown.innerHTML =
+        '<option value="">Totes les comunitats</option>' +
+        COMMUNITIES.map(c => `<option value="${c.id}">${c.nom} (${c.id})</option>`).join('');
+    }   
     
     console.log(
       `✅ Dades carregades: ${COMMUNITIES.length} comunitats, ${CLIENTS.length} clients`
@@ -109,15 +117,6 @@ const elClientsComms = document.getElementById('kpi-clients-comms');
 if (elClientsComms) {
   const total = new Set((CLIENTS || []).map(c => c.comunitat)).size;
   elClientsComms.textContent = total;
-}
-
-// ── DROPDOWN NOMÉS A CLIENTS ──
-const sel = document.getElementById('filter-comm-clients');
-
-if (sel && typeof currentView !== 'undefined' && currentView === 'clients') {
-  sel.innerHTML =
-    '<option value="">Totes les comunitats</option>' +
-    COMMUNITIES.map(c => `<option value="${c.id}">${c.nom} (${c.id})</option>`).join('');
 }
   
   } catch (err) {
