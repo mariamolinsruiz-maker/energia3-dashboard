@@ -1870,7 +1870,7 @@ document.getElementById('c-contacte').value = c.contacte || '';
 document.getElementById('c-email').value    = c.email;
 document.getElementById('c-tel').value      = c.telefon;
 document.getElementById('c-adreca').value   = c.adreca;
-document.getElementById('c-potencia').value = c.total_kw;
+document.getElementById('c-potencia').value = c.potencia || '';
 document.getElementById('c-onboarding').value = c.onboarding;
 document.getElementById('c-acord').value    = c.acord_reparto;
 document.getElementById('c-informe').value  = c.informe_auto;
@@ -1967,7 +1967,7 @@ div.dataset.codi = cl.codi;
 div.innerHTML = `
    <input value="${cl.nom}" id="cr-nom-${r}">
    <input value="${cl.nif}" id="cr-nif-${r}">
-   <input value="${cl.cups}" id="cr-cups-${r}">
+   <input value="${cl.cups_consum}" id="cr-cups-${r}">
    <input type="number" value="${cl.kw}" id="cr-kw-${r}">
    <input type="email" value="${cl.email}" id="cr-email-${r}">
    <input value="${cl.tel}" id="cr-tel-${r}">
@@ -2013,7 +2013,7 @@ contacte: document.getElementById('c-contacte').value.trim() || promotor,
 email:    document.getElementById('c-email').value.trim(),
 telefon:  document.getElementById('c-tel').value.trim(),
 adreca:   document.getElementById('c-adreca').value.trim(),
-potencia: potencia + ',0 kW',
+potencia: potencia
 onboarding:   document.getElementById('c-onboarding').value,
 acord_reparto: document.getElementById('c-acord').value,
 fi_inscripcions: fiFormatted,
@@ -2030,7 +2030,7 @@ total_estalvi:0, total_kw: potencia, total_clients:0,
 };
 
 // ── Process client rows ──
-const rows = document.querySelectorAll('#client-rows-body tr');
+const rows = document.querySelectorAll('#client-rows-body .client-table-row');
 const newClients = [];
 console.log("Rows detectades:", rows.length);
 rows.forEach((row, i) => {
@@ -2044,7 +2044,7 @@ newClients.push({
 codi,
 nom: nom_cl,
 nif: document.getElementById('cr-nif-' + r)?.value.trim() || '',
-cups: cups || '—',
+cups_consum: cups || '—',
 tel: document.getElementById('cr-tel-' + r)?.value.trim() || '',
 email: document.getElementById('cr-email-' + r)?.value.trim() || '',
 inici_fact: '-', baixa: '-', app: 'No',
