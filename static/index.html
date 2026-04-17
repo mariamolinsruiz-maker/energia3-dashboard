@@ -2324,12 +2324,14 @@ function renderIncidents() {
   if (!tbody) return;
 
   let data = INCIDENTS;
+  const sel = document.getElementById('filter-incidents');
+  const selected = sel ? sel.value : 'tots';
 
-  // 🔥 FILTRE (CLAU)
-  if (currentIncidentType) {
+// 🔥 FILTRE REAL (dropdown)
+  if (selected !== 'tots') {
     data = INCIDENTS.filter(i =>
-      (i.tipus || '').toLowerCase().replace(/\s+/g, '_') === currentIncidentType
-    );
+      (i.tipus || '').toLowerCase().replace(/\s+/g, '_') === selected
+                           );
   }
 
   tbody.innerHTML = data.map(i => `
