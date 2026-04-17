@@ -384,17 +384,32 @@ function getClientsByCommunity(commId) {
 }
 
 function getAgreementsStats() {
-  return {
-    total: AGREEMENTS.length,
-    pendents: AGREEMENTS.filter(a => a.estat !== 'Firmat').length,
-    comunitats: new Set(AGREEMENTS.map(a => a.comunitat)).size,
-    firmants: AGREEMENTS.length
-  };
+  const total = AGREEMENTS.length;
+
+  const pendents = AGREEMENTS.filter(a =>
+    (a.estat || '').toLowerCase() === 'pendent'
+  ).length;
+
+  const comunitats = new Set(
+    AGREEMENTS.map(a => a.comunitat).filter(Boolean)
+  ).size;
+
+  const firmants = AGREEMENTS.length;
+
+  return { total, pendents, comunitats, firmants };
 }
 
 function getIncidentsStats() {
   const totalActives = COMMUNITIES.length;
-  const ambErrors = new Set(INCIDENTS.map(i => i.comunitat)).size;
+
+  const incidentsActius = INCIDENTS.filter(i =>
+    (i.estat || '').toLowerCase() === 'pendent'
+  );
+
+  const ambErrors = new Set(
+    incidentsActius.map(i => i.comunitat).filter(Boolean)
+  ).size;
+
   const senseErrors = totalActives - ambErrors;
 
   return { totalActives, ambErrors, senseErrors };
