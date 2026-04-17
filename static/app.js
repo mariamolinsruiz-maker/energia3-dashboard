@@ -72,16 +72,6 @@ async function loadFromAPI() {
     // Re-renderitzar tot el frontend amb les noves dades
     reloadCurrentView && reloadCurrentView();
 
-    if (typeof currentView !== 'undefined' && currentView === 'errors') {
-      const statsI = getIncidentsStats();
-      
-      const elETotal = document.getElementById('kpi-errors-total');
-      const elEAmb   = document.getElementById('kpi-errors-amb');
-      const elESense = document.getElementById('kpi-errors-sense');
-      if (elETotal) elETotal.textContent = statsI.totalActives;
-      if (elEAmb)   elEAmb.textContent   = statsI.ambErrors;
-      if (elESense) elESense.textContent = statsI.senseErrors;
-    }
     // ✅ dropdown segur (fora de problemes de scope)
     const dropdown = document.getElementById('filter-comm-clients');
     if (dropdown) {
@@ -111,16 +101,34 @@ async function loadFromAPI() {
     
     const badgeA = document.getElementById('badge-acords');
     if (badgeA) badgeA.textContent = statsA.pendents;
-    
-    let statsI = { ambErrors: 0 };
-    if (typeof getIncidentsStats === 'function') {
-      statsI = getIncidentsStats();
-    }
 
-    // KPIs Errors (pantalla errors)
-    const elETotal = document.getElementById('kpi-errors-total');
-    const elEAmb   = document.getElementById('kpi-errors-amb');
-    const elESense = document.getElementById('kpi-errors-sense');
+    let statsI = { totalActives: 0, ambErrors: 0, senseErrors: 0 };
+
+if (typeof getIncidentsStats === 'function') {
+  statsI = getIncidentsStats();
+}
+
+// KPIs Errors
+const elETotal = document.getElementById('kpi-errors-total');
+const elEAmb   = document.getElementById('kpi-errors-amb');
+const elESense = document.getElementById('kpi-errors-sense');
+const elPercent = document.getElementById('kpi-errors-percent');
+
+if (elETotal) elETotal.textContent = statsI.totalActives;
+if (elEAmb)   elEAmb.textContent   = statsI.ambErrors;
+if (elESense) elESense.textContent = statsI.senseErrors;
+
+if (elPercent) {
+  const percent = statsI.totalActives > 0
+    ? (statsI.ambErrors / statsI.totalActives) * 100
+    : 0;
+
+  elPercent.textContent = percent.toFixed(1).replace('.', ',') + '%';
+}
+
+// badge sidebar
+const badgeE = document.getElementById('badge-errors');
+if (badgeE) badgeE.textContent = statsI.ambErrors;
     
     if (elETotal) elETotal.textContent = statsI.totalActives;
     if (elEAmb)   elEAmb.textContent   = statsI.ambErrors;
