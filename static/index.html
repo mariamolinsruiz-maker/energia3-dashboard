@@ -1668,7 +1668,8 @@ if (elComms) {
 
 function filterClientsTable() {
 const term = document.getElementById('search-clients').value.toLowerCase();
-const cf = document.getElementById('filter-comm-clients').value;
+const sel = document.getElementById('filter-comm-clients');
+const cf = sel ? sel.value : '';
 const rows = document.querySelectorAll('#clients-tbody tr');
 rows.forEach(row => {
 const text = row.textContent.toLowerCase();
@@ -2235,10 +2236,6 @@ if (currentView === 'clients') {
       '<option value="">Totes les comunitats</option>' +
       COMMUNITIES.map(c => `<option value="${c.id}">${c.nom} (${c.id})</option>`).join('');
   }
-}
-  if (sel) {
-sel.innerHTML = '<option value="">Totes les comunitats</option>' +
-COMMUNITIES.map(c => `<option value="${c.id}">${c.nom} (${c.id})</option>`).join('');
 }
 }
 
