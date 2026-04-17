@@ -2217,39 +2217,64 @@ if (currentView === 'clients') {
 //  RELOAD VIEW AFTER CHANGES
 // ─────────────────────────────────────────────
 function reloadCurrentView() {
-if (currentView === 'dashboard')        { mapDashboard = null; initDashboard(); }
-else if (currentView === 'comunitats')  { renderCommunityCards(); }
-else if (currentView === 'clients')     { renderClientsTable(); }
-else if (currentView === 'comunitat-detail') {
-const comm = COMMUNITIES.find(c => c.id === currentCommunity);
-if (comm) renderCommunityDetail(currentCommunity);
-else navigate('comunitats');
-}
-// Sync dashboard community filter select
-if (currentView === 'clients') {
-  const sel = document.getElementById('filter-comm-clients');
-  if (sel) {
-    sel.innerHTML =
-      '<option value="">Totes les comunitats</option>' +
-      COMMUNITIES.map(c => `<option value="${c.id}">${c.nom} (${c.id})</option>`).join('');
+  if (currentView === 'dashboard') {
+    mapDashboard = null;
+    initDashboard();
+  }
+  else if (currentView === 'comunitats') {
+    renderCommunityCards();
+  }
+  else if (currentView === 'clients') {
+    renderClientsTable();
+  }
+  else if (currentView === 'comunitat-detail') {
+    const comm = COMMUNITIES.find(c => c.id === currentCommunity);
+    if (comm) renderCommunityDetail(currentCommunity);
+    else navigate('comunitats');
+  }
+
+  // 🔥 AFEGEIX AIXÒ
+  else if (currentView === 'acords') {
+    renderAcords();
+
+    const statsA = getAgreementsStats();
+
+    const elATotal = document.getElementById('kpi-acords-total');
+    const elAPend  = document.getElementById('kpi-acords-pendents');
+    const elAComm  = document.getElementById('kpi-acords-comunitats');
+    const elAFirm  = document.getElementById('kpi-acords-firmants');
+
+    if (elATotal) elATotal.textContent = statsA.total;
+    if (elAPend)  elAPend.textContent  = statsA.pendents;
+    if (elAComm)  elAComm.textContent = statsA.comunitats;
+    if (elAFirm)  elAFirm.textContent = statsA.firmants;
+  }
+
+  else if (currentView === 'errors') {
+    renderIncidents();
+
+    const statsI = getIncidentsStats();
+
+    const elETotal = document.getElementById('kpi-errors-total');
+    const elEAmb   = document.getElementById('kpi-errors-amb');
+    const elESense = document.getElementById('kpi-errors-sense');
+
+    if (elETotal) elETotal.textContent = statsI.totalActives;
+    if (elEAmb)   elEAmb.textContent   = statsI.ambErrors;
+    if (elESense) elESense.textContent = statsI.senseErrors;
+  }
+
+  // 🔁 això ja ho tenies (correcte)
+  if (currentView === 'clients') {
+    const sel = document.getElementById('filter-comm-clients');
+    if (sel) {
+      sel.innerHTML =
+        '<option value="">Totes les comunitats</option>' +
+        COMMUNITIES.map(c => `<option value="${c.id}">${c.nom} (${c.id})</option>`).join('');
+    }
   }
 }
-}
-
-// Close modals on overlay click
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-overlay.addEventListener('click', e => {
-if (e.target === overlay) overlay.classList.remove('open');
-});
-});
-const confirmOverlay = document.getElementById('confirm-overlay');
-
-if (confirmOverlay) {
-  confirmOverlay.addEventListener('click', e => {
-    if (e.target === confirmOverlay) closeConfirm();
-  });
-}
-
+  
 function renderAcords() {
   const tbody = document.getElementById('acords-tbody');
   if (!tbody) return;
