@@ -53,8 +53,12 @@ async function loadFromAPI() {
     // Buidar les arrays globals declarades a l'HTML
     COMMUNITIES.splice(0, COMMUNITIES.length);
     CLIENTS.splice(0, CLIENTS.length);
-    AGREEMENTS.splice(0, AGREEMENTS.length);
-    INCIDENTS.splice(0, INCIDENTS.length);
+    if (typeof AGREEMENTS !== 'undefined') {
+      AGREEMENTS.splice(0, AGREEMENTS.length);
+    }
+    if (typeof INCIDENTS !== 'undefined') {
+      INCIDENTS.splice(0, INCIDENTS.length);
+    }
 
     // Omplir amb les dades de l'API
     communities.forEach(c => COMMUNITIES.push(c));
