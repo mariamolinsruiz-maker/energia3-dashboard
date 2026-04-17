@@ -127,9 +127,6 @@ if (elPercent) {
 }
 
 // badge sidebar
-const badgeE = document.getElementById('badge-errors');
-if (badgeE) badgeE.textContent = statsI.ambErrors;
-    
     if (elETotal) elETotal.textContent = statsI.totalActives;
     if (elEAmb)   elEAmb.textContent   = statsI.ambErrors;
     if (elESense) elESense.textContent = statsI.senseErrors;
