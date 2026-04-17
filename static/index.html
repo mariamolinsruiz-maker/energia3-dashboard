@@ -1893,8 +1893,9 @@ document.getElementById('c-acord').value = 'Pendent';
 document.getElementById('c-informe').value = 'Sense informe auto';
 document.getElementById('c-marca').value = 'Sense informe auto';
 pickColorVal('#1B4D31');
-document.getElementById('client-rows-body').innerHTML = '';
-addClientRow(); addClientRow(); // start with 2 blank rows
+const el = document.getElementById('client-rows-body');
+if (el) el.innerHTML = '';
+  addClientRow(); addClientRow(); // start with 2 blank rows
 }
 
 goStep(1);
