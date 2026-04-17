@@ -2227,7 +2227,9 @@ else navigate('comunitats');
 if (currentView === 'clients') {
   const sel = document.getElementById('filter-comm-clients');
   if (sel) {
-    sel.innerHTML = ...
+    sel.innerHTML =
+      '<option value="">Totes les comunitats</option>' +
+      COMMUNITIES.map(c => `<option value="${c.id}">${c.nom} (${c.id})</option>`).join('');
   }
 }
   if (sel) {
