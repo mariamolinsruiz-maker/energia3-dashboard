@@ -1380,7 +1380,7 @@ document.getElementById('detail-content').innerHTML = `
            <tbody>
              ${clients.map(c => `<tr>
                <td class="mono"><strong>${c.codi}</strong></td>
-               <td class="td-cups">${c.cups}</td>
+               <td class="td-cups">${c.cups_consum}</td>
                <td class="td-name">${c.nom}</td>
                <td class="mono">${c.kw.toLocaleString('ca-ES')}</td>
                <td>${c.modalitat}</td>
@@ -1427,7 +1427,7 @@ document.getElementById('detail-content').innerHTML = `
          <tbody>
            ${clients.map(c => `<tr>
              <td class="mono"><strong>${c.codi}</strong></td>
-             <td class="td-cups">${c.cups}</td>
+             <td class="td-cups">${c.cups_consum}</td>
              <td class="td-name">${c.nom}</td>
              <td>${estatBadge(c.estat)}</td>
              <td class="mono">${c.kw.toLocaleString('ca-ES')}</td>
@@ -2113,7 +2113,7 @@ newClients.push({
 codi,
 nom: nom_cl,
 nif: document.getElementById('cr-nif-' + r)?.value.trim() || '',
-cups_consum: cups || '—',
+cups: cups || '—',
 tel: document.getElementById('cr-tel-' + r)?.value.trim() || '',
 email: document.getElementById('cr-email-' + r)?.value.trim() || '',
 inici_fact: '-', baixa: '-', app: 'No',
@@ -2236,7 +2236,7 @@ const cups = document.getElementById('cl-cups').value.trim();
 const newCl = {
 codi: editingClientCodi || nextClientCodi(editingClientCommId),
 nom, nif,
-cups: cups || '—',
+cups_consum: cups || '—',
 tel:   document.getElementById('cl-tel').value.trim(),
 email: document.getElementById('cl-email').value.trim(),
 inici_fact: '-', baixa: '-', app: 'No',
