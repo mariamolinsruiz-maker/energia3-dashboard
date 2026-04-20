@@ -1985,18 +1985,27 @@ const div = document.createElement('div');
 div.className = 'client-table-row';
 div.id = 'crow-' + r;
 div.innerHTML = `
-   <input placeholder="Nom / Empresa" id="cr-nom-${r}">
-   <input placeholder="B12345678" id="cr-nif-${r}">
-   <input placeholder="ES003140..." id="cr-cups-${r}">
-   <input type="number" min="0" step="0.5" placeholder="kW" id="cr-kw-${r}">
-   <input type="email" placeholder="correu@..." id="cr-email-${r}">
-   <input placeholder="9XXXXXXXX" id="cr-tel-${r}">
-   <select id="cr-estat-${r}">
-     <option value="Proposat">Proposat</option>
-     <option value="Reserva">Reserva</option>
-     <option value="Actiu">Actiu</option>
-   </select>
-   <button class="del-row" onclick="removeClientRow(${r})">✕</button>`;
+<input placeholder="Nom / Empresa *" id="cr-nom-${r}">
+<input placeholder="NIF *" id="cr-nif-${r}">
+<input placeholder="CUPS consum *" id="cr-cups-${r}">
+<input placeholder="Distribuidora" id="cr-dist-${r}">
+<input type="number" min="0" step="0.5" placeholder="kW *" id="cr-kw-${r}">
+<input type="email" placeholder="Email *" id="cr-email-${r}">
+<input placeholder="Telèfon" id="cr-tel-${r}">
+
+<input type="number" step="0.001" placeholder="Preu llum €/kWh" id="cr-preu-${r}">
+<input type="number" step="0.1" placeholder="Cost fix €/kW" id="cr-cost-${r}">
+<input type="number" step="0.1" placeholder="% autoconsum" id="cr-auto-${r}">
+
+<select id="cr-estat-${r}">
+  <option value="">Estat *</option>
+  <option value="Actiu">Actiu</option>
+  <option value="Reserva">Reserva</option>
+  <option value="Proposat">Proposat</option>
+</select>
+
+<button class="del-row" onclick="removeClientRow(${r})">✕</button>
+`;
 document.getElementById('client-rows-body').appendChild(div);
 }
 
@@ -2104,31 +2113,61 @@ const newClients = [];
 console.log("Rows detectades:", rows.length);
 rows.forEach((row, i) => {
 const r = i + 1;
-const nom_cl = row.querySelector('[id^="cr-nom-"]')?.value?.trim();
-if (!nom_cl) return; // skip empty rows
+const nom_cl = document.getElementById(`cr-nom-${r}`)?.value.trim();
+const nif = document.getElementById(`cr-nif-${r}`)?.value.trim();
+const cups = document.getElementById(`cr-cups-${r}`)?.value.trim();
+const dist = document.getElementById(`cr-dist-${r}`)?.value.trim();
+const kwVal = document.getElementById(`cr-kw-${r}`)?.value;
+const email = document.getElementById(`cr-email-${r}`)?.value.trim();
+const tel = document.getElementById(`cr-tel-${r}`)?.value.trim();
+const estat = document.getElementById(`cr-estat-${r}`)?.value;
+const preu = parseFloat(document.getElementById(`cr-preu-${r}`)?.value) || 0;
+const costFix = parseFloat(document.getElementById(`cr-cost-${r}`)?.value) || 0;
+const pctAuto = parseFloat(document.getElementById(`cr-auto-${r}`)?.value) || 0;
+// fila buida → OK
+if (!nom_cl && !nif && !cups && !kwVal && !email && !estat) return;
+// validació obligatòria
+if (!nom_cl || !nif || !cups || !kwVal || !email || !estat) {
+  errEl.textContent = '⚠ Participants incomplets (nom, nif, cups, kW, email i estat obligatoris)';
+  goStep(2);
+  throw new Error('Participant incomplet');
+}
 const codi = row.dataset.codi || nextClientCodi_seq(id, i + 1);
-const kw = parseFloat(document.getElementById('cr-kw-' + r)?.value) || 0;
-const cups = document.getElementById('cr-cups-' + r)?.value.trim();
+const kw = parseFloat(kwVal) || 0;
+
 newClients.push({
-codi,
-nom: nom_cl,
-nif: document.getElementById('cr-nif-' + r)?.value.trim() || '',
-cups: cups || '—',
-tel: document.getElementById('cr-tel-' + r)?.value.trim() || '',
-email: document.getElementById('cr-email-' + r)?.value.trim() || '',
-inici_fact: '-', baixa: '-', app: 'No',
-estat: document.getElementById('cr-estat-' + r)?.value || 'Proposat',
-modalitat: 'Ahorra sempre', perfil: 'F',
-comercialitz: '0091', import_eur: 0,
-comunitat: id, kw, kwh: kw * 1500,
-preu_llum: 0, estalvi_brut: 0,
-cost_fix: kw * 12, preu_kwh: 0.088,
-pct_estalvi: null, periode: 0,
-distribuidora: '031',
-cups_auth: cups ? 'OK' : 'Falten',
-cups_auth_note: cups ? '' : 'Pendent',
-autoconsum: '-', datadis: 'Actiu',
-dades_recents: 'Sense dades', sense_auto: 'OK'
+  codi,
+  nom: nom_cl,
+  nif,
+  cups_consum: cups,
+  distribuidora: dist || '',
+  tel,
+  email,
+  estat,
+  comunitat: id,
+  kw,
+  kwh: kw * 1500,
+  // ⚡ NOUS CAMPS
+  preu_llum: preu,
+  cost_fix: costFix,
+  pct_estalvi: pctAuto, // (millor seria pct_autoconsum)
+  // defaults sistema
+  inici_fact: '-',
+  baixa: '-',
+  app: 'No',
+  modalitat: 'Ahorra sempre',
+  perfil: 'F',
+  comercialitz: '0091',
+  import_eur: 0,
+  estalvi_brut: 0,
+  preu_kwh: 0.088,
+  periode: 0,
+  cups_auth: cups ? 'OK' : 'Falten',
+  cups_auth_note: cups ? '' : 'Pendent',
+  autoconsum: '-',
+  datadis: 'Actiu',
+  dades_recents: 'Sense dades',
+  sense_auto: 'OK'
 });
 });
 
