@@ -539,7 +539,7 @@ function exportClientsVisible() {
   const select = document.getElementById("filter-comm-clients");
   let data = CLIENTS;
 
-  if (select && select.value !== "all") {
+  if (select && select.value) {
     data = CLIENTS.filter(c => c.comunitat === select.value);
   }
 
