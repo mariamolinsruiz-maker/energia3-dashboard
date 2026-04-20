@@ -2772,63 +2772,47 @@ Si deixes el CUPS buit es marcarà com "Pendent d'autoritzar". Pots editar les d
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
-
 <div class="modal-overlay" id="modal-client">
   <div class="modal-box">
-
     <div class="modal-header">
       <span id="modal-client-title">+ Participant</span>
       <button onclick="closeModal('modal-client')">✕</button>
     </div>
-
     <div class="modal-body">
       <div class="form-grid">
-
         <input id="cl-codi" disabled>
-
         <input id="cl-nom" placeholder="Nom *">
         <input id="cl-nif" placeholder="NIF *">
         <input id="cl-tel" placeholder="Telèfon">
         <input id="cl-email" placeholder="Email *">
-
         <input id="cl-kw" type="number" placeholder="kW *">
         <input id="cl-cost" type="number" placeholder="Cost fix €/kW *">
         <input id="cl-auto" type="number" placeholder="% Autoconsum">
-
         <input id="cl-inici" type="date">
         <input id="cl-baixa" type="date">
-
         <select id="cl-app">
           <option>No</option>
           <option>Si</option>
         </select>
-
         <select id="cl-estat">
           <option>Actiu</option>
           <option>Reserva</option>
           <option>Proposat</option>
         </select>
-
         <select id="cl-modalitat">
           <option>Ahorra sempre</option>
         </select>
-
         <select id="cl-perfil">
           <option>F</option>
         </select>
-
         <input id="cl-comercialitz">
         <input id="cl-import" type="number">
-
         <input id="cl-comunitat">
-
       </div>
     </div>
-
     <div class="modal-footer">
       <button onclick="saveClient()">💾 Guardar</button>
     </div>
-
   </div>
 </div>
 
