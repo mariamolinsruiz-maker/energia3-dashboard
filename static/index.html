@@ -492,6 +492,19 @@ transition:color .15s;
 .swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;}
 .swatch:hover{transform:scale(1.18);}
 .swatch.sel{border-color:var(--text);box-shadow:0 0 0 2px #fff inset;}
+  .table-wrap {
+    overflow-x: auto;
+  }
+  .table-wrap table {
+    table-layout: fixed;
+    width: 100%;
+  }
+  .table-wrap th,
+  .table-wrap td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 </style>
 </head>
 <body>
