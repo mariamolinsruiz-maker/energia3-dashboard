@@ -1124,7 +1124,50 @@ document.getElementById('detail-content').innerHTML = `
        <div class="info-cell"><div class="info-lbl">Adreça (CP)</div><div class="info-val">${comm.adreca.split('–')[0].trim()}</div></div>
      </div>
    </div>
+   
+<!-- INSTAL·LACIÓ FV -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">⚡ Instal·lació fotovoltaica</span>
+  </div>
+  <div class="card-body">
+    <div class="comm-info-grid">
 
+      <div class="info-cell">
+        <div class="info-lbl">Potència nominal</div>
+        <div class="info-val">${comm.potencia} kW</div>
+      </div>
+
+      <div class="info-cell">
+        <div class="info-lbl">Orientació</div>
+        <div class="info-val">${comm.orientacio || '-'}</div>
+      </div>
+
+      <div class="info-cell">
+        <div class="info-lbl">Inclinació</div>
+        <div class="info-val">${comm.inclinacio || '-'} º</div>
+      </div>
+
+      <div class="info-cell">
+        <div class="info-lbl">Producció anual</div>
+        <div class="info-val">${comm.producció_anual_kwh || '-'} kWh</div>
+      </div>
+
+      <div class="info-cell">
+        <div class="info-lbl">CUPS generació</div>
+        <div class="info-val">${comm.cups_generacio || '-'}</div>
+      </div>
+
+      <div class="info-cell">
+        <div class="info-lbl">Inversor</div>
+        <div class="info-val">
+          ${(comm.inversor_marca || '') + ' ' + (comm.inversor_model || '') || '-'}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
    <!-- MINI KPI GRID -->
    <div class="mini-kpi-grid">
      <div class="mini-kpi ok"><div class="mini-kpi-icon">👥</div><div class="mini-kpi-val">${comm.clients_actius}</div><div class="mini-kpi-lbl">Clients actius</div></div>
