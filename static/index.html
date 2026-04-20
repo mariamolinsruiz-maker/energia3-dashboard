@@ -1994,10 +1994,30 @@ const promotor = document.getElementById('c-promotor').value.trim();
 const potencia = parseFloat(document.getElementById('c-potencia').value) || 0;
 const errEl    = document.getElementById('modal-comm-err');
 
-if (!nom || !promotor || !potencia) {
-errEl.textContent = '⚠ Omple els camps obligatoris: Nom, Promotor i Potència.';
-goStep(1); return;
+const adreca = document.getElementById('c-adreca').value.trim();
+const orientacio = document.getElementById('c-orientacio').value.trim();
+const inclinacio = document.getElementById('c-inclinacio').value;
+const produccio = document.getElementById('c-produccio').value;
+const cupsGen = document.getElementById('c-cups-gen').value.trim();
+const invMarca = document.getElementById('c-inversor-marca').value.trim();
+const invModel = document.getElementById('c-inversor-model').value.trim();
+
+if (
+  !nom ||
+  !adreca ||
+  !potencia ||
+  !orientacio ||
+  !inclinacio ||
+  !produccio ||
+  !cupsGen ||
+  !invMarca ||
+  !invModel
+) {
+  errEl.textContent = '⚠ Omple totes les dades de la instal·lació FV.';
+  goStep(1);
+  return;
 }
+  
 errEl.textContent = '';
 
 const id = editingCommId || document.getElementById('c-id').value;
@@ -2014,6 +2034,12 @@ email:    document.getElementById('c-email').value.trim(),
 telefon:  document.getElementById('c-tel').value.trim(),
 adreca:   document.getElementById('c-adreca').value.trim(),
 potencia: potencia,
+orientacio: orientacio,
+inclinacio: parseInt(inclinacio),
+producció_anual_kwh: parseFloat(produccio),
+cups_generacio: cupsGen,
+inversor_marca: invMarca,
+inversor_model: invModel,
 onboarding:   document.getElementById('c-onboarding').value,
 acord_reparto: document.getElementById('c-acord').value,
 fi_inscripcions: fiFormatted,
@@ -2402,6 +2428,31 @@ function renderIncidents() {
 <div class="form-group">
 <label class="form-label">Potència total (kW) *</label>
 <input class="form-input" id="c-potencia" type="number" min="0" placeholder="Ex: 90">
+</div>
+  <!-- ═════ INSTAL·LACIÓ FV ═════ -->
+<div class="form-group">
+  <label class="form-label">Orientació panells *</label>
+  <input class="form-input" id="c-orientacio" placeholder="Ex: Sud, SE, SW">
+</div>
+<div class="form-group">
+  <label class="form-label">Inclinació (º) *</label>
+  <input class="form-input" id="c-inclinacio" type="number" min="0" max="90" placeholder="Ex: 30">
+</div>
+<div class="form-group">
+  <label class="form-label">Producció anual esperada (kWh) *</label>
+  <input class="form-input" id="c-produccio" type="number" min="0" placeholder="Ex: 120000">
+</div>
+<div class="form-group fc2">
+  <label class="form-label">CUPS generació *</label>
+  <input class="form-input" id="c-cups-gen" placeholder="ESXXXXXXXXXXXX">
+</div>
+<div class="form-group">
+  <label class="form-label">Marca inversor *</label>
+  <input class="form-input" id="c-inversor-marca" placeholder="Ex: Huawei">
+</div>
+<div class="form-group">
+  <label class="form-label">Model inversor *</label>
+  <input class="form-input" id="c-inversor-model" placeholder="Ex: SUN2000-100K">
 </div>
 <div class="form-group">
 <label class="form-label">Fi inscripcions</label>
