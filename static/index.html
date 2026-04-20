@@ -1688,22 +1688,37 @@ const tbody = document.getElementById('clients-tbody');
 tbody.innerHTML = data.map(c => {
 const comm = COMMUNITIES.find(x => x.id === c.comunitat);
 return `<tr>
-     <td class="mono"><strong>${c.codi}</strong></td>
-     <td class="td-name">${c.nom}</td>
-     <td class="td-cups">${c.cups_consum}</td>
-     <td class="mono">${c.nif}</td>
-     <td class="mono">${c.tel}</td>
-     <td style="font-size:0.78rem">${c.email}</td>
-     <td class="mono">${c.inici_fact}</td>
-     <td>${c.baixa}</td>
-     <td>${c.app==='Sí'?'<span class="chip-ok">Sí</span>':'<span class="chip-grey">No</span>'}</td>
-     <td>${estatBadge(c.estat)}</td>
-     <td style="font-size:0.78rem">${c.modalitat}</td>
-     <td class="mono">${c.perfil}</td>
-     <td class="mono">${c.comercialitz}</td>
-     <td class="mono">${c.import_eur>0?c.import_eur.toLocaleString('ca-ES')+' €':'0,00 €'}</td>
-     <td><span onclick="navigate('comunitat-detail',{id:'${c.comunitat}'})" style="cursor:pointer;color:var(--g600);font-weight:600;">${comm?comm.nom:c.comunitat}</span></td>
-   </tr>`;
+  <td class="mono"><strong>${c.codi}</strong></td>
+  <td class="td-name">${c.nom}</td>
+  <td class="td-cups">${c.cups_consum}</td>
+  <td class="mono">${c.nif}</td>
+  <td class="mono">${c.tel}</td>
+  <td style="font-size:0.78rem">${c.email}</td>
+  <td class="mono">${c.inici_fact}</td>
+  <td>${c.baixa}</td>
+  <!-- 🔧 FIX app -->
+  <td>${(c.app === 'Si' || c.app === 'Sí')
+    ? '<span class="chip-ok">Sí</span>'
+    : '<span class="chip-grey">No</span>'}</td>
+  <td>${estatBadge(c.estat)}</td>
+  <td style="font-size:0.78rem">${c.modalitat}</td>
+  <td class="mono">${c.perfil}</td>
+  <td class="mono">${c.comercialitz}</td>
+  <td class="mono">${c.import_eur>0?c.import_eur.toLocaleString('ca-ES')+' €':'0,00 €'}</td>
+  <td>
+    <span onclick="navigate('comunitat-detail',{id:'${c.comunitat}'})"
+      style="cursor:pointer;color:var(--g600);font-weight:600;">
+      ${comm?comm.nom:c.comunitat}
+    </span>
+  </td>
+  <!-- 🔥 NOVA COLUMNA -->
+  <td>
+    <button class="btn btn-ghost btn-sm"
+      onclick="openClientModal('${c.comunitat}','${c.codi}')">
+      ✏️
+    </button>
+  </td>
+</tr>`;
 }).join('');
 document.getElementById('stat-total-clients').textContent = data.length;
 document.getElementById('stat-actius').textContent = data.filter(c=>c.estat==='Actiu').length;
@@ -2274,91 +2289,80 @@ reloadCurrentView();
 //  AFEGIR CLIENT DES DEL DETALL
 // ─────────────────────────────────────────────
 function openClientModal(commId, clientCodi) {
-editingClientCommId = commId;
-editingClientCodi   = clientCodi || null;
-document.getElementById('modal-client-err').textContent = '';
-document.getElementById('modal-client-title').textContent = clientCodi ? '✏️ Editar participant' : '+ Nou participant';
+  editingClientCommId = commId;
+  editingClientCodi = clientCodi || null;
+  const cl = CLIENTS.find(c => c.codi === clientCodi);
+  if (cl) {
+    document.getElementById('cl-codi').value = cl.codi;
+    document.getElementById('cl-nom').value = cl.nom;
+    document.getElementById('cl-nif').value = cl.nif;
+    document.getElementById('cl-tel').value = cl.tel;
+    document.getElementById('cl-email').value = cl.email;
+    document.getElementById('cl-kw').value = cl.kw;
+    document.getElementById('cl-cost').value = cl.cost_fix;
+    document.getElementById('cl-auto').value = cl.autoconsum;
+    document.getElementById('cl-inici').value = cl.inici_fact;
+    document.getElementById('cl-baixa').value = cl.baixa;
+    document.getElementById('cl-app').value = cl.app;
+    document.getElementById('cl-estat').value = cl.estat;
+    document.getElementById('cl-modalitat').value = cl.modalitat;
+    document.getElementById('cl-perfil').value = cl.perfil;
+    document.getElementById('cl-comercialitz').value = cl.comercialitz;
+    document.getElementById('cl-import').value = cl.import_eur;
+    document.getElementById('cl-comunitat').value = cl.comunitat;
+  }
 
-if (clientCodi) {
-const cl = CLIENTS.find(c => c.codi === clientCodi);
-if (!cl) return;
-document.getElementById('cl-nom').value  = cl.nom;
-document.getElementById('cl-nif').value  = cl.nif;
-document.getElementById('cl-cups').value = cl.cups_consum === '—' ? '' : cl.cups_consum;
-document.getElementById('cl-email').value = cl.email;
-document.getElementById('cl-tel').value  = cl.tel;
-document.getElementById('cl-kw').value   = cl.kw;
-document.getElementById('cl-estat').value = cl.estat;
-document.getElementById('cl-modalitat').value = cl.modalitat;
-document.getElementById('cl-preu').value = cl.preu_llum || '';
-document.getElementById('cl-perfil').value = cl.perfil || 'F';
-} else {
-['cl-nom','cl-nif','cl-cups','cl-email','cl-tel','cl-kw','cl-preu'].forEach(f => {
-document.getElementById(f).value = '';
-});
-document.getElementById('cl-estat').value = 'Proposat';
-document.getElementById('cl-modalitat').value = 'Ahorra sempre';
-document.getElementById('cl-perfil').value = 'F';
+  openModal('modal-client');
 }
-openModal('modal-client');
-}
-
+  
 function saveClient() {
-const nom  = document.getElementById('cl-nom').value.trim();
-const nif  = document.getElementById('cl-nif').value.trim();
-const kw   = parseFloat(document.getElementById('cl-kw').value) || 0;
-const errEl = document.getElementById('modal-client-err');
+  const kw = parseFloat(document.getElementById('cl-kw').value) || 0;
+  const preu = parseFloat(document.getElementById('cl-preu')?.value) || 0;
+  const costFix = parseFloat(document.getElementById('cl-cost').value) || 0;
+  const pctAuto = parseFloat(document.getElementById('cl-auto').value) || 0;
 
-if (!nom || !nif || !kw) {
-errEl.textContent = '⚠ Omple els camps: Nom, NIF i kW assignats.';
-return;
-}
-errEl.textContent = '';
+  const kwh = kw * 1500;
+  const estalvi_brut = preu * kwh;
+  const cost_anual = costFix * kw * 12;
+  const preu_kwh = kwh > 0 ? cost_anual / kwh : 0;
+  const capacitat_estalvi = kwh * (preu - preu_kwh);
+  const percent_capacitat_estalvi = estalvi_brut > 0 ? capacitat_estalvi / estalvi_brut : 0;
+  const estalvi_auto = (pctAuto / 100) * capacitat_estalvi;
 
-const cups = document.getElementById('cl-cups').value.trim();
-const newCl = {
-codi: editingClientCodi || nextClientCodi(editingClientCommId),
-nom, nif,
-cups_consum: cups || '—',
-tel:   document.getElementById('cl-tel').value.trim(),
-email: document.getElementById('cl-email').value.trim(),
-inici_fact: '-', baixa: '-', app: 'No',
-estat:    document.getElementById('cl-estat').value,
-modalitat: document.getElementById('cl-modalitat').value,
-perfil: document.getElementById('cl-perfil').value,
-comercialitz: '0091', import_eur: 0,
-comunitat: editingClientCommId,
-kw, kwh: kw * 1500,
-preu_llum: parseFloat(document.getElementById('cl-preu').value) || 0,
-estalvi_brut: 0, cost_fix: kw * 12,
-preu_kwh: 0.088, pct_estalvi: null,
-periode: 0, distribuidora: '031',
-cups_auth: cups ? 'OK' : 'Falten',
-cups_auth_note: cups ? '' : 'Pendent',
-autoconsum: '-', datadis: 'Actiu',
-dades_recents: 'Sense dades', sense_auto: 'OK'
-};
+  const clientObj = {
+    codi: editingClientCodi,
+    nom: document.getElementById('cl-nom').value,
+    nif: document.getElementById('cl-nif').value,
+    tel: document.getElementById('cl-tel').value,
+    email: document.getElementById('cl-email').value,
+    kw,
+    cost_fix: costFix,
+    autoconsum: pctAuto,
+    inici_fact: document.getElementById('cl-inici').value,
+    baixa: document.getElementById('cl-baixa').value,
+    app: document.getElementById('cl-app').value,
+    estat: document.getElementById('cl-estat').value,
+    modalitat: document.getElementById('cl-modalitat').value,
+    perfil: document.getElementById('cl-perfil').value,
+    comercialitz: document.getElementById('cl-comercialitz').value,
+    import_eur: parseFloat(document.getElementById('cl-import').value) || 0,
+    comunitat: document.getElementById('cl-comunitat').value,
 
-if (editingClientCodi) {
-const idx = CLIENTS.findIndex(c => c.codi === editingClientCodi);
-if (idx > -1) CLIENTS[idx] = newCl;
-showToast('✅ Participant actualitzat');
-} else {
-CLIENTS.push(newCl);
-// Update community totals
-const comm = COMMUNITIES.find(c => c.id === editingClientCommId);
-if (comm) {
-const commClients = CLIENTS.filter(c => c.comunitat === editingClientCommId);
-comm.total_kw = commClients.reduce((s, c) => s + c.kw, 0);
-}
-showToast('✅ Participant afegit correctament');
-}
+    kwh,
+    estalvi_brut,
+    preu_kwh,
+    pct_estalvi: estalvi_brut > 0 ? cost_anual / estalvi_brut : 0,
+    capacitat_estalvi,
+    percent_capacitat_estalvi,
+    estalvi_amb_autoconsum_anterior: estalvi_auto
+  };
 
-if (currentView === 'clients') {
-  renderClientsTable();
-}
-}
+  const idx = CLIENTS.findIndex(c => c.codi === editingClientCodi);
+  if (idx > -1) CLIENTS[idx] = clientObj;
 
+  closeModal('modal-client');
+  reloadCurrentView();
+}
 // ─────────────────────────────────────────────
 //  ELIMINAR CLIENT
 // ─────────────────────────────────────────────
@@ -2769,7 +2773,64 @@ Si deixes el CUPS buit es marcarà com "Pendent d'autoritzar". Pots editar les d
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<div class="modal-overlay" id="modal-client">
+  <div class="modal-box">
 
+    <div class="modal-header">
+      <span id="modal-client-title">+ Participant</span>
+      <button onclick="closeModal('modal-client')">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+
+        <input id="cl-codi" disabled>
+
+        <input id="cl-nom" placeholder="Nom *">
+        <input id="cl-nif" placeholder="NIF *">
+        <input id="cl-tel" placeholder="Telèfon">
+        <input id="cl-email" placeholder="Email *">
+
+        <input id="cl-kw" type="number" placeholder="kW *">
+        <input id="cl-cost" type="number" placeholder="Cost fix €/kW *">
+        <input id="cl-auto" type="number" placeholder="% Autoconsum">
+
+        <input id="cl-inici" type="date">
+        <input id="cl-baixa" type="date">
+
+        <select id="cl-app">
+          <option>No</option>
+          <option>Si</option>
+        </select>
+
+        <select id="cl-estat">
+          <option>Actiu</option>
+          <option>Reserva</option>
+          <option>Proposat</option>
+        </select>
+
+        <select id="cl-modalitat">
+          <option>Ahorra sempre</option>
+        </select>
+
+        <select id="cl-perfil">
+          <option>F</option>
+        </select>
+
+        <input id="cl-comercialitz">
+        <input id="cl-import" type="number">
+
+        <input id="cl-comunitat">
+
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button onclick="saveClient()">💾 Guardar</button>
+    </div>
+
+  </div>
+</div>
 
   </body>
   </html>
