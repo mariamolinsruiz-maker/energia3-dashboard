@@ -1488,7 +1488,7 @@ const pct = c.pct_estalvi;
 return `<tr>
    <td class="mono"><strong>${c.codi}</strong></td>
    <td class="td-name">${c.nom}</td>
-   <td class="td-cups">${c.cups}</td>
+   <td class="td-cups">${c.cups_consum}</td>
    <td class="mono">${c.nif}</td>
    <td class="mono">${c.tel}</td>
    <td style="font-size:0.78rem">${c.email}</td>
@@ -1609,8 +1609,7 @@ L.marker([lat, lng], {icon: pIcon})
       <div style="font-size:0.76rem;color:#555;line-height:1.6">
         📋 Codi: <strong>${c.codi}</strong><br>
         ⚡ ${c.kw} kW assignats · ${c.kwh.toLocaleString('ca-ES')} kWh/any<br>
-        🔌 CUPS: <span style="font-family:monospace;font-size:0.7rem">${c.cups}</span><br>
-        ${c.cups_auth!=='OK'?`<span style="color:#C53030;font-weight:600">⚠ CUPS no autoritzat${c.cups_auth_note?' ('+c.cups_auth_note+')':''}</span><br>`:''}
+        🔌 CUPS: <span style="font-family:monospace;font-size:0.7rem">${c.cups_consum}</span><br>
         📊 Estat: ${c.estat} · ${c.modalitat}<br>
         ${c.pct_estalvi?`💶 Estalvi estimat: ${c.pct_estalvi}%`:''}
       </div>
@@ -1691,7 +1690,7 @@ const comm = COMMUNITIES.find(x => x.id === c.comunitat);
 return `<tr>
      <td class="mono"><strong>${c.codi}</strong></td>
      <td class="td-name">${c.nom}</td>
-     <td class="td-cups">${c.cups}</td>
+     <td class="td-cups">${c.cups_consum}</td>
      <td class="mono">${c.nif}</td>
      <td class="mono">${c.tel}</td>
      <td style="font-size:0.78rem">${c.email}</td>
@@ -2240,7 +2239,7 @@ const cl = CLIENTS.find(c => c.codi === clientCodi);
 if (!cl) return;
 document.getElementById('cl-nom').value  = cl.nom;
 document.getElementById('cl-nif').value  = cl.nif;
-document.getElementById('cl-cups').value = cl.cups === '—' ? '' : cl.cups;
+document.getElementById('cl-cups').value = cl.cups_consum === '—' ? '' : cl.cups_consum;
 document.getElementById('cl-email').value = cl.email;
 document.getElementById('cl-tel').value  = cl.tel;
 document.getElementById('cl-kw').value   = cl.kw;
