@@ -2036,6 +2036,33 @@ const el = document.getElementById('crow-' + r);
 if (el) el.remove();
 }
 
+function computeClientMetrics({ kw, preu_llum, cost_fix, pct_autoconsum }) {
+  const kwh = kw * 1500;
+  const cost_anual = cost_fix * kw * 12;
+  const estalvi_brut = preu_llum * kwh;
+  const pct_estalvi = estalvi_brut > 0
+    ? cost_anual / estalvi_brut
+    : 0;
+  const preu_kwh = kwh > 0
+    ? cost_anual / kwh
+    : 0;
+  const capacitat_estalvi = kwh * (preu_llum - preu_kwh);
+  const percent_capacitat_estalvi = estalvi_brut > 0
+    ? capacitat_estalvi / estalvi_brut
+    : 0;
+  const estalvi_amb_autoconsum_anterior =
+    (pct_autoconsum / 100) * capacitat_estalvi;
+  return {
+    kwh,
+    estalvi_brut,
+    pct_estalvi,
+    preu_kwh,
+    capacitat_estalvi,
+    percent_capacitat_estalvi,
+    estalvi_amb_autoconsum_anterior
+  };
+}
+  
 // ─────────────────────────────────────────────
 //  GUARDAR COMUNITAT
 // ─────────────────────────────────────────────
@@ -2133,7 +2160,23 @@ if (!nom_cl || !nif || !cups || !kwVal || !email || !estat) {
 }
 const codi = row.dataset.codi || nextClientCodi_seq(id, i + 1);
 const kw = parseFloat(kwVal) || 0;
+const kwh = kw * 1500;
 
+const estalvi_brut = preu * kwh;
+const cost_anual = costFix * kw * 12;
+const pct_estalvi = estalvi_brut > 0
+  ? cost_anual / estalvi_brut
+  : 0;
+const preu_kwh = kwh > 0
+  ? cost_anual / kwh
+  : 0;
+const capacitat_estalvi = kwh * (preu - preu_kwh);
+const percent_capacitat_estalvi = estalvi_brut > 0
+  ? capacitat_estalvi / estalvi_brut
+  : 0;
+const estalvi_amb_autoconsum_anterior =
+  (pctAuto / 100) * capacitat_estalvi;
+  
 newClients.push({
   codi,
   nom: nom_cl,
@@ -2145,12 +2188,16 @@ newClients.push({
   estat,
   comunitat: id,
   kw,
-  kwh: kw * 1500,
-  // ⚡ NOUS CAMPS
+  kwh: kwh,
   preu_llum: preu,
   cost_fix: costFix,
-  pct_estalvi: pctAuto, // (millor seria pct_autoconsum)
-  // defaults sistema
+  pct_estalvi: pct_estalvi * 100,
+  estalvi_brut: estalvi_brut,
+  preu_kwh: preu_kwh,
+  capacitat_estalvi: capacitat_estalvi,
+  percent_capacitat_estalvi: percent_capacitat_estalvi,
+  estalvi_amb_autoconsum_anterior: estalvi_amb_autoconsum_anterior,
+  // defaults
   inici_fact: '-',
   baixa: '-',
   app: 'No',
@@ -2158,13 +2205,11 @@ newClients.push({
   perfil: 'F',
   comercialitz: '0091',
   import_eur: 0,
-  estalvi_brut: 0,
-  preu_kwh: 0.088,
   periode: 0,
   cups_auth: cups ? 'OK' : 'Falten',
   cups_auth_note: cups ? '' : 'Pendent',
-  autoconsum: '-',
-  datadis: 'Actiu',
+  autoconsum: pctAuto,
+  datadis: 'Desconegut',
   dades_recents: 'Sense dades',
   sense_auto: 'OK'
 });
