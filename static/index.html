@@ -2293,7 +2293,6 @@ function openClientModal(commId, clientCodi) {
   editingClientCodi = clientCodi || null;
   const cl = CLIENTS.find(c => c.codi === clientCodi);
   if (cl) {
-    document.getElementById('cl-codi').value = cl.codi;
     document.getElementById('cl-nom').value = cl.nom;
     document.getElementById('cl-nif').value = cl.nif;
     document.getElementById('cl-tel').value = cl.tel;
@@ -2301,15 +2300,16 @@ function openClientModal(commId, clientCodi) {
     document.getElementById('cl-kw').value = cl.kw;
     document.getElementById('cl-cost').value = cl.cost_fix;
     document.getElementById('cl-auto').value = cl.autoconsum;
-    document.getElementById('cl-inici').value = cl.inici_fact;
-    document.getElementById('cl-baixa').value = cl.baixa;
+    document.getElementById('cl-inici').value =
+      cl.inici_fact && cl.inici_fact !== '-' ? cl.inici_fact : '';
+    document.getElementById('cl-baixa').value =
+      cl.baixa && cl.baixa !== '-' ? cl.baixa : '';
     document.getElementById('cl-app').value = cl.app;
     document.getElementById('cl-estat').value = cl.estat;
     document.getElementById('cl-modalitat').value = cl.modalitat;
     document.getElementById('cl-perfil').value = cl.perfil;
     document.getElementById('cl-comercialitz').value = cl.comercialitz;
     document.getElementById('cl-import').value = cl.import_eur;
-    document.getElementById('cl-comunitat').value = cl.comunitat;
   }
 
   openModal('modal-client');
