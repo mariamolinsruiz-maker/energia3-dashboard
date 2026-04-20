@@ -2315,7 +2315,7 @@ function openClientModal(commId, clientCodi) {
   openModal('modal-client');
 }
   
-function saveClient() {
+async function saveClient() {
   const kw = parseFloat(document.getElementById('cl-kw').value) || 0;
   const preu = parseFloat(document.getElementById('cl-preu')?.value) || 0;
   const costFix = parseFloat(document.getElementById('cl-cost').value) || 0;
@@ -2329,6 +2329,10 @@ function saveClient() {
   const percent_capacitat_estalvi = estalvi_brut > 0 ? capacitat_estalvi / estalvi_brut : 0;
   const estalvi_auto = (pctAuto / 100) * capacitat_estalvi;
 
+  if (!clientObj.nom || !clientObj.nif || !clientObj.kw) {
+  alert('Falten camps obligatoris');
+  return;
+}
   const clientObj = {
     codi: editingClientCodi,
     nom: document.getElementById('cl-nom').value,
@@ -2346,8 +2350,8 @@ function saveClient() {
     perfil: document.getElementById('cl-perfil').value,
     comercialitz: document.getElementById('cl-comercialitz').value,
     import_eur: parseFloat(document.getElementById('cl-import').value) || 0,
-    comunitat: document.getElementById('cl-comunitat').value,
-
+    comunitat: editingClientCommId,
+    
     kwh,
     estalvi_brut,
     preu_kwh,
@@ -2357,11 +2361,21 @@ function saveClient() {
     estalvi_amb_autoconsum_anterior: estalvi_auto
   };
 
-  const idx = CLIENTS.findIndex(c => c.codi === editingClientCodi);
-  if (idx > -1) CLIENTS[idx] = clientObj;
-
-  closeModal('modal-client');
-  reloadCurrentView();
+const { error } = await supabase
+  .from('clients')
+  .update(clientObj)
+  .eq('codi', editingClientCodi);
+if (error) {
+  console.error(error);
+  alert('Error guardant client');
+  return;
+}
+// actualitza també local
+const idx = CLIENTS.findIndex(c => c.codi === editingClientCodi);
+if (idx > -1) CLIENTS[idx] = clientObj;
+closeModal('modal-client');
+reloadCurrentView();
+  
 }
 // ─────────────────────────────────────────────
 //  ELIMINAR CLIENT
