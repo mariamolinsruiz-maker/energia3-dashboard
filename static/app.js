@@ -336,23 +336,39 @@ window.saveClient = async function () {
   })();
 
   const clientObj = {
-    codi, nom, nif,
-    cups:  cups || '—',
-    tel:   document.getElementById('cl-tel').value.trim(),
-    email: document.getElementById('cl-email').value.trim(),
-    inici_fact: '-', baixa: '-', app: 'No',
-    estat:     document.getElementById('cl-estat').value,
-    modalitat: document.getElementById('cl-modalitat').value,
-    perfil:    document.getElementById('cl-perfil').value,
-    comercialitz: '0091', import_eur: 0,
-    comunitat: editingClientCommId,
-    kw, kwh: kw * 1500,
-    preu_llum: parseFloat(document.getElementById('cl-preu').value) || 0,
-    estalvi_brut: 0, cost_fix: kw * 12,
-    preu_kwh: 0.088, pct_estalvi: null, periode: 0, distribuidora: '031',
-    cups_auth: cups ? 'OK' : 'Falten', cups_auth_note: cups ? '' : 'Pendent',
-    autoconsum: '-', datadis: 'Actiu', dades_recents: 'Sense dades', sense_auto: 'OK',
-  };
+  codi, nom, nif,
+
+  cups_consum: cups || null,
+  tel: document.getElementById('cl-tel').value.trim() || null,
+  email: document.getElementById('cl-email').value.trim(),
+  inici_fact: document.getElementById('cl-inici')?.value || null,
+  baixa: document.getElementById('cl-baixa')?.value || null,
+  app: document.getElementById('cl-app')?.value || 'No',
+  estat: document.getElementById('cl-estat').value,
+  modalitat: document.getElementById('cl-modalitat').value,
+  perfil: document.getElementById('cl-perfil').value,
+  comercialitz: document.getElementById('cl-comercialitz')?.value || null,
+  import_eur: parseFloat(document.getElementById('cl-import')?.value) || 0,
+  comunitat: editingClientCommId,
+  kw,
+  kwh: kw * 1500,
+  preu_llum: parseFloat(document.getElementById('cl-preu').value) || 0,
+  cost_fix: parseFloat(document.getElementById('cl-cost').value) || 0,
+  autoconsum: parseFloat(document.getElementById('cl-auto').value) || 0,
+  estalvi_brut: 0,
+  preu_kwh: 0,
+  pct_estalvi: null,
+  capacitat_estalvi: 0,
+  percent_capacitat_estalvi: 0,
+  estalvi_amb_autoconsum_anterior: 0,
+
+  distribuidora: null,
+  cups_auth: cups ? 'OK' : 'Falten',
+  cups_auth_note: cups ? '' : 'Pendent',
+  datadis: 'Desconegut',
+  dades_recents: 'Sense dades',
+  sense_auto: 'OK'
+};
 
   try {
     if (editingClientCodi) {
