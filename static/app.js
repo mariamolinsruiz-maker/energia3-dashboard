@@ -232,14 +232,14 @@ window.saveComm = async function () {
       cups_consum:  cups || '—',
       tel:   document.getElementById(`cr-tel-${r}`)?.value.trim()   || '',
       email: document.getElementById(`cr-email-${r}`)?.value.trim() || '',
-      inici_fact: '-', baixa: '-', app: 'No',
+      inici_fact: null, baixa: null, app: 'No',
       estat: document.getElementById(`cr-estat-${r}`)?.value || 'Proposat',
       modalitat: 'Ahorra sempre', perfil: 'F', comercialitz: '0091', import_eur: 0,
       comunitat: id, kw, kwh: kw * 1500,
       preu_llum: 0, estalvi_brut: 0, cost_fix: kw * 12,
       preu_kwh: 0.088, pct_estalvi: null, periode: 0, distribuidora: '031',
       cups_auth: cups ? 'OK' : 'Falten', cups_auth_note: cups ? '' : 'Pendent',
-      autoconsum: '-', datadis: 'Actiu', dades_recents: 'Sense dades', sense_auto: 'OK',
+      autoconsum: null, datadis: 'Actiu', dades_recents: 'Sense dades', sense_auto: 'OK',
     });
   });
 
