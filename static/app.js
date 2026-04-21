@@ -619,6 +619,79 @@ document.addEventListener('DOMContentLoaded', () => {
   loadFromAPI();
 });
 
+async function updateCommunityEnergy(commId) {
+  const start = document.getElementById(`estalvi-start-${commId}`)?.value;
+  const end   = document.getElementById(`estalvi-end-${commId}`)?.value;
+  const canvas = document.getElementById(`chart-estalvi-${commId}`);
+
+  if (!canvas) return;
+
+  let query = supabase
+    .from('clients_energy')
+    .select('*')
+    .eq('community_id', commId); // ⚠️ IMPORTANT
+
+  if (start) {
+    const [y, m] = start.split('-');
+    query = query.gte('year', +y).gte('month', +m);
+  }
+
+  if (end) {
+    const [y, m] = end.split('-');
+    query = query.lte('year', +y).lte('month', +m);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  // ── agrupar per mes ──
+  const grouped = {};
+
+  data.forEach(r => {
+    const key = `${r.year}-${String(r.month).padStart(2, '0')}`;
+    if (!grouped[key]) grouped[key] = { auto: 0, exc: 0, estalvi: 0 };
+
+    grouped[key].auto += r.autoconsum_kwh || 0;
+    grouped[key].exc  += r.excedent_kwh || 0;
+    grouped[key].estalvi += r.estalvi_mes || 0;
+  });
+
+  const labels = Object.keys(grouped).sort();
+  const autoData = labels.map(k => grouped[k].auto);
+  const excData  = labels.map(k => grouped[k].exc);
+
+  // destruir gràfic anterior
+  if (canvas._chart) canvas._chart.destroy();
+
+  const ctx = canvas.getContext('2d');
+
+  canvas._chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Autoconsum', data: autoData },
+        { label: 'Excedent', data: excData }
+      ]
+    },
+    options: { responsive: true }
+  });
+
+  // ── estalvi total ──
+  const total = data.reduce((s, r) => s + (r.estalvi_mes || 0), 0);
+
+  const el = document.querySelector(`#tab-estalvi-${commId} .card-body`);
+  if (el) {
+    const box = el.querySelector('div div div');
+    if (box) {
+      box.textContent = total.toFixed(2) + ' €';
+    }
+  }
+}
 
 // ─────────────────────────────────────────────
 // EXPORT CSV (genèric)
