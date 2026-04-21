@@ -2011,28 +2011,24 @@ const r = rowCounter;
 const div = document.createElement('div');
 div.className = 'client-table-row';
 div.id = 'crow-' + r;
-div.innerHTML = `
-<input placeholder="Nom / Empresa *" id="cr-nom-${r}">
-<input placeholder="NIF *" id="cr-nif-${r}">
-<input placeholder="CUPS consum *" id="cr-cups-${r}">
-<input placeholder="Distribuidora" id="cr-dist-${r}">
-<input type="number" min="0" step="0.5" placeholder="kW *" id="cr-kw-${r}">
-<input type="email" placeholder="Email *" id="cr-email-${r}">
-<input placeholder="Telèfon" id="cr-tel-${r}">
-
-<input type="number" step="0.001" placeholder="Preu llum €/kWh" id="cr-preu-${r}">
-<input type="number" step="0.1" placeholder="Cost fix €/kW" id="cr-cost-${r}">
-<input type="number" step="0.1" placeholder="% autoconsum" id="cr-auto-${r}">
-
-<select id="cr-estat-${r}">
-  <option value="">Estat *</option>
-  <option value="Actiu">Actiu</option>
-  <option value="Reserva">Reserva</option>
-  <option value="Proposat">Proposat</option>
-</select>
-
-<button class="del-row" onclick="removeClientRow(${r})">✕</button>
+row.innerHTML = `
+  <input id="cr-nom-${r}" placeholder="Nom" />
+  <input id="cr-nif-${r}" placeholder="NIF" />
+  <input id="cr-cups-${r}" placeholder="CUPS" />
+  <input id="cr-dist-${r}" placeholder="Distrib." />
+  <input id="cr-kw-${r}" type="number" placeholder="kW" />
+  <input id="cr-email-${r}" placeholder="Email" />
+  <input id="cr-tel-${r}" placeholder="Telèfon" />
+  <select id="cr-estat-${r}">
+    <option>Proposat</option>
+    <option>Reserva</option>
+    <option>Actiu</option>
+  </select>
+  <input id="cr-cost-${r}" type="number" placeholder="€/kW" />
+  <input id="cr-auto-${r}" type="number" placeholder="%Auto" />
+  <button onclick="removeClientRow(this)">✕</button>
 `;
+
 document.getElementById('client-rows-body').appendChild(div);
 }
 
