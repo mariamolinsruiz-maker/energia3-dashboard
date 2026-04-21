@@ -617,9 +617,26 @@ async function updateCommunityEnergy(commId) {
 
   if (!canvas) return;
 
-  let query = supabase
-    .from('clients_energy')
-    .select('*');
+ const clientCodis = CLIENTS
+  .filter(c => c.comunitat === commId)
+  .map(c => c.codi);
+
+if (!clientCodis.length) return;
+
+let query = supabase
+  .from('clients_energy')
+  .select('*')
+  .in('codi', clientCodis);
+
+  if (start) {
+  const [y, m] = start.split('-');
+  query = query.gte('year', +y).gte('month', +m);
+}
+
+if (end) {
+  const [y, m] = end.split('-');
+  query = query.lte('year', +y).lte('month', +m);
+}
 
   const { data, error } = await query;
 
