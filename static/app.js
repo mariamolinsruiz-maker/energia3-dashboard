@@ -617,66 +617,46 @@ async function updateCommunityEnergy(commId) {
 
   if (!canvas) return;
 
- const clientCodis = CLIENTS
-  .filter(c => c.comunitat === commId)
-  .map(c => c.codi);
+  try {
+    let url = `/api/energy/${commId}`;
 
-if (!clientCodis.length) return;
-
-let query = supabase
-  .from('clients_energy')
-  .select('*')
-  .in('codi', clientCodis);
-
-  if (start) {
-  const [y, m] = start.split('-');
-  query = query.gte('year', +y).gte('month', +m);
-}
-
-if (end) {
-  const [y, m] = end.split('-');
-  query = query.lte('year', +y).lte('month', +m);
-}
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  // ⚠️ TEMPORAL: sense filtre de comunitat (per provar)
-  // després ho arreglem bé
-
-  const grouped = {};
-
-  data.forEach(r => {
-    const key = `${r.year}-${String(r.month).padStart(2, '0')}`;
-    if (!grouped[key]) grouped[key] = { auto: 0, exc: 0, estalvi: 0 };
-
-    grouped[key].auto += r.autoconsum_kwh || 0;
-    grouped[key].exc  += r.excedent_kwh || 0;
-    grouped[key].estalvi += r.estalvi_mes || 0;
-  });
-
-  const labels = Object.keys(grouped).sort();
-  const autoData = labels.map(k => grouped[k].auto);
-  const excData  = labels.map(k => grouped[k].exc);
-
-  if (canvas._chart) canvas._chart.destroy();
-
-  const ctx = canvas.getContext('2d');
-
-  canvas._chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Autoconsum', data: autoData },
-        { label: 'Excedent', data: excData }
-      ]
+    if (start && end) {
+      url += `?start=${start}&end=${end}`;
     }
-  });
+
+    const data = await apiFetch(url);
+
+    console.log("ENERGY API:", data);
+
+    const labels = data.labels || [];
+    const autoData = data.autoconsum || [];
+    const excData  = data.excedent || [];
+
+    // destruir gràfic anterior
+    if (canvas._chart) canvas._chart.destroy();
+
+    const ctx = canvas.getContext('2d');
+
+    canvas._chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Autoconsum', data: autoData },
+          { label: 'Excedent', data: excData }
+        ]
+      }
+    });
+
+    // estalvi total
+    const el = document.getElementById(`estalvi-total-${commId}`);
+    if (el) {
+      el.textContent = (data.estalvi_total || 0).toFixed(2) + ' €';
+    }
+
+  } catch (err) {
+    console.error("Error carregant energia:", err);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
