@@ -2037,7 +2037,7 @@ div.innerHTML = `
   <input id="cr-nom-${r}" placeholder="Nom" />
   <input id="cr-nif-${r}" placeholder="NIF" />
   <input id="cr-cups-${r}" placeholder="CUPS" />
-  <input id="cr-dist-${r}" placeholder="Distrib." />
+  <input id="cr-comercialitzadora-${r}" placeholder="Comercialitz." />
   <input id="cr-kw-${r}" type="number" placeholder="kW" />
   <input id="cr-email-${r}" placeholder="Email" />
   <input id="cr-tel-${r}" placeholder="Telèfon" />
@@ -2188,7 +2188,7 @@ const r = i + 1;
 const nom_cl = document.getElementById(`cr-nom-${r}`)?.value.trim();
 const nif = document.getElementById(`cr-nif-${r}`)?.value.trim();
 const cups = document.getElementById(`cr-cups-${r}`)?.value.trim();
-const comercialitzadora = document.getElementById(`cr-dist-${r}`)?.value.trim();
+const comercialitzadora = document.getElementById(`cr-comercialitzadora-${r}`)?.value.trim();
 const kwVal = document.getElementById(`cr-kw-${r}`)?.value;
 const email = document.getElementById(`cr-email-${r}`)?.value.trim();
 const tel = document.getElementById(`cr-tel-${r}`)?.value.trim();
@@ -2703,7 +2703,7 @@ function renderIncidents() {
   <span>Nom / Empresa</span>
   <span>NIF</span>
   <span>CUPS</span>
-  <span>Distrib.</span>
+  <span>Comercialitz.</span>
   <span>kW</span>
   <span>Email</span>
   <span>Telèfon</span>
