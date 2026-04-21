@@ -478,7 +478,7 @@ transition:color .15s;
   1.8fr   /* nom */
   1fr     /* nif */
   2fr     /* cups */
-  1fr     /* distribuidora */
+  1fr     /* comercialitzadora */
   0.8fr   /* kw */
   1.5fr   /* email */
   1fr     /* tel */
@@ -490,7 +490,7 @@ transition:color .15s;
   1.8fr   /* nom */
   1fr     /* nif */
   2fr     /* cups */
-  1fr     /* distribuidora */
+  1fr     /* comercialitzadora */
   0.8fr   /* kw */
   1.5fr   /* email */
   1fr     /* tel */
@@ -1485,7 +1485,7 @@ document.getElementById('detail-content').innerHTML = `
        <table>
          <thead>
            <tr>
-             <th>Codi</th><th>Nom</th><th>Periode</th><th>Distribuidora</th>
+             <th>Codi</th><th>Nom</th><th>Periode</th><th>Comercialitzadora</th>
              <th>kWN</th><th>Alta</th><th>CUPS Auth</th>
              <th>Autoconsum</th><th>Datadis</th><th>Dades recents</th><th>Sense auto</th>
            </tr>
@@ -1495,7 +1495,7 @@ document.getElementById('detail-content').innerHTML = `
              <td class="mono"><strong>${c.codi}</strong></td>
              <td class="td-name">${c.nom}</td>
              <td class="mono">${c.periode}</td>
-             <td class="mono">${c.distribuidora}</td>
+             <td class="mono">${c.comercialitzadora}</td>
              <td class="mono">${c.kw.toLocaleString('ca-ES')}</td>
              <td class="mono">—</td>
              <td>${c.cups_auth==='OK'?`<span class="chip-ok">OK</span>`:`<span class="chip-warn">Falten${c.cups_auth_note?' ('+c.cups_auth_note+')':''}</span>`}</td>
