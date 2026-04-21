@@ -1504,7 +1504,14 @@ document.getElementById('detail-content').innerHTML = `
 setTimeout(() => {
 initDetailMap(comm);
 initDetailChart(comm, clients);
-initSavingsCharts(id);
+updateCommunityEnergy(id);
+
+const start = document.getElementById(`estalvi-start-${id}`);
+const end   = document.getElementById(`estalvi-end-${id}`);
+
+if (start) start.addEventListener('change', () => updateCommunityEnergy(id));
+if (end)   end.addEventListener('change', () => updateCommunityEnergy(id));
+  
 }, 250);
 }
 
