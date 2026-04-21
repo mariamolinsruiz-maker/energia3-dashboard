@@ -38,8 +38,8 @@ async function apiFetch(path, method = 'GET', body = undefined) {
 // ─────────────────────────────────────────────────────────────
 
 async function loadFromAPI() {
-  if (_dataLoaded) return;
-  _dataLoaded = true;
+  // if (_dataLoaded) return;
+  // _dataLoaded = true;
   try {
     // Fetch en paral·lel
     const [communities, clients, agreements, incidents] = await Promise.all([
