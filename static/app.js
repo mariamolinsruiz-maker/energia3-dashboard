@@ -384,6 +384,8 @@ window.saveClient = async function (e) {
 
   closeModal('modal-client');
   await loadFromAPI();
+  await loadFromAPI();
+  reloadCurrentView();
   // Re-renderitzar el detall si estem al detall de la comunitat
   if (
     typeof currentView !== 'undefined' &&
