@@ -2348,8 +2348,8 @@ function openClientModal(commId, clientCodi) {
 async function saveClient() {
   const kw = parseFloat(document.getElementById('cl-kw').value) || 0;
   const preu = parseFloat(document.getElementById('cl-preu')?.value) || 0;
-  const costFix = parseFloat(document.getElementById('cl-cost').value) || 0;
-  const pctAuto = parseFloat(document.getElementById('cl-auto').value) || 0;
+  const costFix = parseFloat(document.getElementById('cl-cost')?.value) || 0;
+  const pctAuto = parseFloat(document.getElementById('cl-auto')?.value) || 0;
 
   const kwh = kw * 1500;
   const estalvi_brut = preu * kwh;
@@ -2359,10 +2359,6 @@ async function saveClient() {
   const percent_capacitat_estalvi = estalvi_brut > 0 ? capacitat_estalvi / estalvi_brut : 0;
   const estalvi_auto = (pctAuto / 100) * capacitat_estalvi;
 
-  if (!clientObj.nom || !clientObj.nif || !clientObj.kw) {
-  alert('Falten camps obligatoris');
-  return;
-}
   const clientObj = {
     codi: editingClientCodi,
     nom: document.getElementById('cl-nom').value,
@@ -2391,10 +2387,24 @@ async function saveClient() {
     estalvi_amb_autoconsum_anterior: estalvi_auto
   };
 
-const { error } = await supabase
-  .from('clients')
-  .update(clientObj)
-  .eq('codi', editingClientCodi);
+if (!clientObj.nom?.trim() || !clientObj.nif?.trim() || !clientObj.kw || clientObj.kw <= 0) {
+  alert('Falten camps obligatoris: Nom, NIF i kW > 0');
+  return;
+}
+  
+let error;
+
+if (editingClientCodi) {
+  ({ error } = await supabase
+    .from('clients')
+    .update(clientObj)
+    .eq('codi', editingClientCodi));
+} else {
+  ({ error } = await supabase
+    .from('clients')
+    .insert([clientObj]));
+}
+  
 if (error) {
   console.error(error);
   alert('Error guardant client');
