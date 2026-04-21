@@ -237,7 +237,7 @@ window.saveComm = async function () {
       modalitat: 'Ahorra sempre', perfil: 'F', comercialitz: '0091', import_eur: 0,
       comunitat: id, kw, kwh: kw * 1500,
       preu_llum: 0, estalvi_brut: 0, cost_fix: kw * 12,
-      preu_kwh: 0.088, pct_estalvi: null, periode: 0, distribuidora: '031',
+      preu_kwh: 0.088, pct_estalvi: null, periode: 0, comercialitzadora: '031',
       cups_auth: cups ? 'OK' : 'Falten', cups_auth_note: cups ? '' : 'Pendent',
       autoconsum: null, datadis: 'Actiu', dades_recents: 'Sense dades', sense_auto: 'OK',
     });
@@ -362,7 +362,7 @@ window.saveClient = async function () {
   percent_capacitat_estalvi: 0,
   estalvi_amb_autoconsum_anterior: 0,
 
-  distribuidora: null,
+  comercialitzadora: null,
   cups_auth: cups ? 'OK' : 'Falten',
   cups_auth_note: cups ? '' : 'Pendent',
   datadis: 'Desconegut',
