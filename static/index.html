@@ -768,7 +768,7 @@ transition:color .15s;
             <th>Estat</th>
             <th>Modalitat</th>
             <th>Perfil</th>
-            <th>Comercialitz.</th>
+            <th>Comercialitzadora.</th>
             <th>Import</th>
             <th>Comunitat</th>
           </tr>
@@ -1260,7 +1260,7 @@ document.getElementById('detail-content').innerHTML = `
                <th>Codi</th><th>Nom</th><th>CUPS</th><th>NIF</th>
                <th>Telèfon</th><th>Email</th><th>Inici Fact.</th>
                <th>App</th><th>Estat</th><th>Modalitat</th><th>Perfil</th>
-               <th>Comercialitz.</th><th>Import</th><th>kWN</th>
+               <th>Comercialitzadora.</th><th>Import</th><th>kWN</th>
                <th>Preu llum</th><th>Estalvi brut</th><th>% Estalvi</th>
                <th>Accions</th>
              </tr>
@@ -1532,7 +1532,7 @@ return `<tr>
    <td>${estatBadge(c.estat)}</td>
    <td style="font-size:0.78rem;white-space:normal;max-width:140px">${c.modalitat}</td>
    <td class="mono">${c.perfil}</td>
-   <td class="mono">${c.comercialitz}</td>
+   <td class="mono">${c.comercialitzadora}</td>
    <td class="mono" style="color:${c.import_eur>0?'var(--g600)':'var(--text-light)'}">${c.import_eur>0?c.import_eur.toLocaleString('ca-ES')+' €':'0,00 €'}</td>
    <td class="mono">${c.kw}</td>
    <td class="mono">${c.preu_llum?c.preu_llum.toFixed(4)+' €':'—'}</td>
@@ -1738,7 +1738,7 @@ return `<tr>
   <td>${estatBadge(c.estat)}</td>
   <td style="font-size:0.78rem">${c.modalitat}</td>
   <td class="mono">${c.perfil}</td>
-  <td class="mono">${c.comercialitz}</td>
+  <td class="mono">${c.comercialitzadora}</td>
   <td class="mono">${c.import_eur>0?c.import_eur.toLocaleString('ca-ES')+' €':'0,00 €'}</td>
   <td>
     <span onclick="navigate('comunitat-detail',{id:'${c.comunitat}'})"
@@ -2188,7 +2188,7 @@ const r = i + 1;
 const nom_cl = document.getElementById(`cr-nom-${r}`)?.value.trim();
 const nif = document.getElementById(`cr-nif-${r}`)?.value.trim();
 const cups = document.getElementById(`cr-cups-${r}`)?.value.trim();
-const dist = document.getElementById(`cr-dist-${r}`)?.value.trim();
+const comercialitzadora = document.getElementById(`cr-dist-${r}`)?.value.trim();
 const kwVal = document.getElementById(`cr-kw-${r}`)?.value;
 const email = document.getElementById(`cr-email-${r}`)?.value.trim();
 const tel = document.getElementById(`cr-tel-${r}`)?.value.trim();
@@ -2228,7 +2228,7 @@ newClients.push({
   nom: nom_cl,
   nif,
   cups_consum: cups,
-  distribuidora: dist || '',
+  comercialitzadora: comercialitzadora || '',
   tel,
   email,
   estat,
@@ -2249,7 +2249,7 @@ newClients.push({
   app: 'No',
   modalitat: 'Ahorra sempre',
   perfil: 'F',
-  comercialitz: '0091',
+  comercialitzadora: '0091',
   import_eur: 0,
   periode: 0,
   cups_auth: cups ? 'OK' : 'Falten',
@@ -2339,7 +2339,7 @@ function openClientModal(commId, clientCodi) {
     document.getElementById('cl-estat').value = cl.estat;
     document.getElementById('cl-modalitat').value = cl.modalitat;
     document.getElementById('cl-perfil').value = cl.perfil;
-    document.getElementById('cl-comercialitz').value = cl.comercialitz;
+    document.getElementById('cl-comercialitzadora').value = cl.comercialitzadora || '';
     document.getElementById('cl-import').value = cl.import_eur;
   }
 
@@ -2379,7 +2379,7 @@ async function saveClient() {
     estat: document.getElementById('cl-estat').value,
     modalitat: document.getElementById('cl-modalitat').value,
     perfil: document.getElementById('cl-perfil').value,
-    comercialitz: document.getElementById('cl-comercialitz').value,
+    comercialitzadora: document.getElementById('cl-comercialitzadora').value,
     import_eur: parseFloat(document.getElementById('cl-import').value) || 0,
     comunitat: editingClientCommId,
     
@@ -2822,7 +2822,7 @@ Si deixes el CUPS buit es marcarà com "Pendent d'autoritzar". Pots editar les d
 <!-- EXTRA -->
 <div class="form-group">
   <label class="form-label">Comercialitzadora</label>
-  <input class="form-input" id="cl-comercialitz">
+  <input class="form-input" id="cl-comercialitzadora">
 </div>
 <div class="form-group">
   <label class="form-label">Import (€)</label>
