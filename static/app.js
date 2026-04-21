@@ -369,18 +369,22 @@ window.saveClient = async function (e) {
   sense_auto: 'OK'
 };
 
-  try {
-    if (editingClientCodi) {
-      await apiFetch(`/api/clients/${editingClientCodi}`, 'PUT', clientObj);
-      showToast('✅ Participant actualitzat i guardat');
-    } else {
-      await apiFetch('/api/clients', 'POST', clientObj);
-      showToast('✅ Participant afegit i guardat');
-    }
-  } catch (err) {
-    errEl.textContent = `⚠ Error de l'API: ${err.message}`;
-    return;
+try {
+  console.log("Enviant client a API:", clientObj);
+
+  if (editingClientCodi) {
+    await apiFetch(`/api/clients/${editingClientCodi}`, 'PUT', clientObj);
+    showToast('✅ Participant actualitzat i guardat');
+  } else {
+    await apiFetch('/api/clients', 'POST', clientObj);
+    showToast('✅ Participant afegit i guardat');
   }
+
+} catch (err) {
+  console.error("❌ ERROR API:", err);
+  errEl.textContent = `⚠ Error de l'API: ${err.message}`;
+  return;
+}
 
   closeModal('modal-client');
   await loadFromAPI();
