@@ -42,12 +42,15 @@ async function loadFromAPI() {
   // _dataLoaded = true;
   try {
     // Fetch en paral·lel
-    const [communities, clients, agreements, incidents] = await Promise.all([
-      apiFetch('/api/communities'),
-      apiFetch('/api/clients'),
-      apiFetch('/api/agreements'),
-      apiFetch('/api/incidents'),
-    ]);
+let communities = [];
+let clients = [];
+let agreements = [];
+let incidents = [];
+
+try { communities = await apiFetch('/api/communities'); } catch(e){ console.error(e); }
+try { clients = await apiFetch('/api/clients'); } catch(e){ console.error(e); }
+try { agreements = await apiFetch('/api/agreements'); } catch(e){ console.error(e); }
+try { incidents = await apiFetch('/api/incidents'); } catch(e){ console.error(e); }
 
     // Buidar les arrays globals declarades a l'HTML
     COMMUNITIES.splice(0, COMMUNITIES.length);
