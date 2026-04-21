@@ -2148,8 +2148,7 @@ const id = editingCommId || document.getElementById('c-id').value;
 const lat = parseFloat(document.getElementById('c-lat').value) || 41.50;
 const lng = parseFloat(document.getElementById('c-lng').value) || 2.00;
 const fiRaw = document.getElementById('c-fi').value;
-const fiFormatted = fiRaw ? fiRaw.split('-').reverse().join('/') : '31/12/2026';
-
+const fiFormatted = fiRaw || '2026-12-31';
 const commObj = {
 id, nom,
 promotor,
@@ -2189,7 +2188,7 @@ const nom_cl = document.getElementById(`cr-nom-${r}`)?.value.trim();
 const nif = document.getElementById(`cr-nif-${r}`)?.value.trim();
 const cups = document.getElementById(`cr-cups-${r}`)?.value.trim();
 const comercialitzadora = document.getElementById(`cr-comercialitzadora-${r}`)?.value.trim();
-const kwVal = document.getElementById(`cr-kw-${r}`)?.value;
+const kwV = document.getElementById(`cr-kw-${r}`)?.value;
 const email = document.getElementById(`cr-email-${r}`)?.value.trim();
 const tel = document.getElementById(`cr-tel-${r}`)?.value.trim();
 const estat = document.getElementById(`cr-estat-${r}`)?.value;
@@ -2197,15 +2196,15 @@ const preu = parseFloat(document.getElementById(`cr-preu-${r}`)?.value) || 0;
 const costFix = parseFloat(document.getElementById(`cr-cost-${r}`)?.value) || 0;
 const pctAuto = parseFloat(document.getElementById(`cr-auto-${r}`)?.value) || 0;
 // fila buida → OK
-if (!nom_cl && !nif && !cups && !kwVal && !email && !estat) return;
+if (!nom_cl && !nif && !cups && !kw && !email && !estat) return;
 // validació obligatòria
-if (!nom_cl || !nif || !cups || !kwVal || !email || !estat) {
+if (!nom_cl || !nif || !cups || !kw || !email || !estat) {
   errEl.textContent = '⚠ Participants incomplets (nom, nif, cups, kW, email i estat obligatoris)';
   goStep(2);
   throw new Error('Participant incomplet');
 }
 const codi = row.dataset.codi || nextClientCodi_seq(id, i + 1);
-const kw = parseFloat(kwVal) || 0;
+const kw = parseFloat(kw) || 0;
 const kwh = kw * 1500;
 
 const estalvi_brut = preu * kwh;
@@ -2243,13 +2242,13 @@ newClients.push({
   capacitat_estalvi: capacitat_estalvi,
   percent_capacitat_estalvi: percent_capacitat_estalvi,
   estalvi_amb_autoconsum_anterior: estalvi_amb_autoconsum_anterior,
+
   // defaults
-  inici_fact: document.getElementById('cl-inici')?.value || null,
-  baixa: document.getElementById('cl-baixa')?.value || null,
+  inici_fact: null,
+  baixa: null,
   app: 'No',
   modalitat: 'Ahorra sempre',
   perfil: 'F',
-  comercialitzadora: '0091',
   import_eur: 0,
   periode: 0,
   cups_auth: cups ? 'OK' : 'Falten',
