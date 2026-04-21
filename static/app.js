@@ -516,6 +516,100 @@ function updateIncidentTypeCounters() {
   if (el4) el4.textContent = counts.multiple;
 }
 
+// ─────────────────────────────────────────────
+// ENERGY (gràfiques)
+// ─────────────────────────────────────────────
+
+async function getClientEnergy(clientId, year, monthStart, monthEnd) {
+  const { data, error } = await supabase
+    .from('clients_energy')
+    .select('*')
+    .eq('id', clientId)
+    .eq('year', year)
+    .gte('month', monthStart)
+    .lte('month', monthEnd)
+    .order('month', { ascending: true });
+
+  if (error) {
+    console.error('Error carregant energia:', error);
+    return [];
+  }
+
+  return data;
+}
+
+function getMonthRange() {
+  const start = document.getElementById('mes-inici').value;
+  const end   = document.getElementById('mes-fi').value;
+
+  if (!start || !end) return null;
+
+  const d1 = new Date(start);
+  const d2 = new Date(end);
+
+  return {
+    year: d1.getFullYear(),
+    monthStart: d1.getMonth() + 1,
+    monthEnd: d2.getMonth() + 1
+  };
+}
+
+function transformEnergyData(rows) {
+  return {
+    labels: rows.map(r => `M${r.month}`),
+    autoconsum: rows.map(r => r.autoconsum_kwh || 0),
+    excedent: rows.map(r => r.excedent_kwh || 0),
+    estalviTotal: rows.reduce((sum, r) => sum + (r.estalvi_mes || 0), 0)
+  };
+}
+
+let energyChart;
+
+function renderEnergyChart(data) {
+  const ctx = document.getElementById('chart-energy');
+
+  if (!ctx) return;
+
+  if (energyChart) energyChart.destroy();
+
+  energyChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.labels,
+      datasets: [
+        { label: 'Autoconsum', data: data.autoconsum },
+        { label: 'Excedent', data: data.excedent }
+      ]
+    },
+    options: {
+      responsive: true
+    }
+  });
+}
+
+async function updateEnergyView(clientId) {
+  const range = getMonthRange();
+  if (!range) return;
+
+  const rows = await getClientEnergy(
+    clientId,
+    range.year,
+    range.monthStart,
+    range.monthEnd
+  );
+
+  console.log("ENERGY ROWS:", rows);
+
+  const data = transformEnergyData(rows);
+
+  renderEnergyChart(data);
+
+  const el = document.getElementById('estalvi-total');
+  if (el) {
+    el.textContent = data.estalviTotal.toFixed(2) + ' €';
+  }
+}
+
 // ─────────────────────────────────────────────────────────────
 //  Punt d'entrada: carregar dades quan el DOM estigui llest
 // ─────────────────────────────────────────────────────────────
