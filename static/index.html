@@ -1280,11 +1280,11 @@ document.getElementById('detail-content').innerHTML = `
            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:0.9rem;">
              <div>
                <div style="font-size:0.68rem;color:var(--text-light);margin-bottom:2px;">Mes inici</div>
-               <input type="month" class="date-input" id="estalvi-start-${id}">
+               <input type="month" class="date-input" id="estalvi-start-${id}" onchange="updateCommunityEnergy('${id}')">
              </div>
              <div>
                <div style="font-size:0.68rem;color:var(--text-light);margin-bottom:2px;">Mes fi</div>
-               <input type="month" class="date-input" id="estalvi-end-${id}">
+               <input type="month" class="date-input" id="estalvi-end-${id}" onchange="updateCommunityEnergy('${id}')">
              </div>
              <button class="btn btn-ghost btn-sm" style="margin-top:14px;" onclick="clearDates('estalvi-'+id)">Netejar</button>
            </div>
@@ -1423,7 +1423,7 @@ document.getElementById('detail-content').innerHTML = `
    <!-- TAB: RENDIMENT -->
    <div id="tab-rendiment-${id}" class="tab-panel">
      <div class="rendiment-header">
-       <div class="rend-card"><div class="rend-val" style="color:var(--g600)">0,00 €</div><div class="rend-lbl">Estalvi total</div></div>
+       <div class="rend-card"> <div class="rend-val" id="estalvi-total-${id}" style="color:var(--g600)">0,00 €</div> <div class="rend-lbl">Estalvi total</div></div>
        <div class="rend-card"><div class="rend-val">0,00 €</div><div class="rend-lbl">Facturació total</div></div>
        <div class="rend-card"><div class="rend-val">0,0%</div><div class="rend-lbl">% Autoconsum</div></div>
        <div class="rend-card"><div class="rend-val" style="color:var(--text-light)">—</div><div class="rend-lbl">Cobertura estalvi/base</div></div>
