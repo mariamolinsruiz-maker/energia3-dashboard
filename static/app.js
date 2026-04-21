@@ -610,15 +610,6 @@ async function updateEnergyView(clientId) {
   }
 }
 
-// ─────────────────────────────────────────────────────────────
-//  Punt d'entrada: carregar dades quan el DOM estigui llest
-// ─────────────────────────────────────────────────────────────
-
-document.addEventListener('DOMContentLoaded', () => {
-  console.log("🚀 Web carregada — carregant dades del backend...");
-  loadFromAPI();
-});
-
 async function updateCommunityEnergy(commId) {
   const start = document.getElementById(`estalvi-start-${commId}`)?.value;
   const end   = document.getElementById(`estalvi-end-${commId}`)?.value;
@@ -628,18 +619,7 @@ async function updateCommunityEnergy(commId) {
 
   let query = supabase
     .from('clients_energy')
-    .select('*')
-    .eq('community_id', commId); // ⚠️ IMPORTANT
-
-  if (start) {
-    const [y, m] = start.split('-');
-    query = query.gte('year', +y).gte('month', +m);
-  }
-
-  if (end) {
-    const [y, m] = end.split('-');
-    query = query.lte('year', +y).lte('month', +m);
-  }
+    .select('*');
 
   const { data, error } = await query;
 
@@ -648,7 +628,9 @@ async function updateCommunityEnergy(commId) {
     return;
   }
 
-  // ── agrupar per mes ──
+  // ⚠️ TEMPORAL: sense filtre de comunitat (per provar)
+  // després ho arreglem bé
+
   const grouped = {};
 
   data.forEach(r => {
@@ -664,7 +646,6 @@ async function updateCommunityEnergy(commId) {
   const autoData = labels.map(k => grouped[k].auto);
   const excData  = labels.map(k => grouped[k].exc);
 
-  // destruir gràfic anterior
   if (canvas._chart) canvas._chart.destroy();
 
   const ctx = canvas.getContext('2d');
@@ -677,21 +658,18 @@ async function updateCommunityEnergy(commId) {
         { label: 'Autoconsum', data: autoData },
         { label: 'Excedent', data: excData }
       ]
-    },
-    options: { responsive: true }
-  });
-
-  // ── estalvi total ──
-  const total = data.reduce((s, r) => s + (r.estalvi_mes || 0), 0);
-
-  const el = document.querySelector(`#tab-estalvi-${commId} .card-body`);
-  if (el) {
-    const box = el.querySelector('div div div');
-    if (box) {
-      box.textContent = total.toFixed(2) + ' €';
     }
-  }
+  });
 }
+
+// ─────────────────────────────────────────────────────────────
+//  Punt d'entrada: carregar dades quan el DOM estigui llest
+// ─────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+  console.log("🚀 Web carregada — carregant dades del backend...");
+  loadFromAPI();
+});
 
 // ─────────────────────────────────────────────
 // EXPORT CSV (genèric)
