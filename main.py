@@ -209,6 +209,58 @@ def delete_client(codi: str):
     supabase.table("clients").delete().eq("codi", codi).execute()
     return {"ok": True}
 
+@app.get("/api/energy/{comm_id}")
+def get_energy(comm_id: str, start: str = None, end: str = None):
+
+    # 1. obtenir clients de la comunitat
+    clients_res = supabase.table("clients").select("codi").eq("comunitat", comm_id).execute()
+    client_codis = [c["codi"] for c in clients_res.data]
+
+    if not client_codis:
+        return {"labels": [], "autoconsum": [], "excedent": [], "estalvi_total": 0}
+
+    # 2. query energia
+    query = supabase.table("clients_energy").select("*").in_("codi", client_codis)
+
+    # 3. filtres dates
+    if start:
+        y, m = map(int, start.split("-"))
+        query = query.gte("year", y).gte("month", m)
+
+    if end:
+        y, m = map(int, end.split("-"))
+        query = query.lte("year", y).lte("month", m)
+
+    res = query.order("year").order("month").execute()
+    rows = res.data
+
+    # 4. agrupar per mes
+    data_by_month = {}
+
+    for r in rows:
+        key = f"{r['year']}-{r['month']:02d}"
+
+        if key not in data_by_month:
+            data_by_month[key] = {
+                "autoconsum": 0,
+                "excedent": 0,
+                "estalvi": 0
+            }
+
+        data_by_month[key]["autoconsum"] += r.get("autoconsum_kwh", 0)
+        data_by_month[key]["excedent"] += r.get("excedent_kwh", 0)
+        data_by_month[key]["estalvi"] += r.get("estalvi_mes", 0)
+
+    # 5. format final
+    labels = sorted(data_by_month.keys())
+
+    return {
+        "labels": labels,
+        "autoconsum": [data_by_month[k]["autoconsum"] for k in labels],
+        "excedent": [data_by_month[k]["excedent"] for k in labels],
+        "estalvi_total": sum(data_by_month[k]["estalvi"] for k in labels)
+    }
+
 # ─────────────────────────────────────
 #  /api/agreements
 # ─────────────────────────────────────
