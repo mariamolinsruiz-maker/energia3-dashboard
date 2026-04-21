@@ -229,7 +229,7 @@ window.saveComm = async function () {
     newClients.push({
       codi, nom: nomCl,
       nif:   document.getElementById(`cr-nif-${r}`)?.value.trim()   || '',
-      cups:  cups || '—',
+      cups_consum:  cups || '—',
       tel:   document.getElementById(`cr-tel-${r}`)?.value.trim()   || '',
       email: document.getElementById(`cr-email-${r}`)?.value.trim() || '',
       inici_fact: '-', baixa: '-', app: 'No',
