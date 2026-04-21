@@ -314,7 +314,8 @@ window.deleteComm = async function (id, event) {
 
 const _origSaveClient = window.saveClient;
 
-window.saveClient = async function () {
+window.saveClient = async function (e) {
+  if (e) e.preventDefault();
   const nom  = document.getElementById('cl-nom').value.trim();
   const nif  = document.getElementById('cl-nif').value.trim();
   const kw   = parseFloat(document.getElementById('cl-kw').value) || 0;
