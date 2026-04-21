@@ -391,7 +391,6 @@ try {
 
   closeModal('modal-client');
   await loadFromAPI();
-  await loadFromAPI();
   reloadCurrentView();
   // Re-renderitzar el detall si estem al detall de la comunitat
   if (
