@@ -1,22 +1,16 @@
 /**
  * ComunitatES · app.js
  *
- * L'index.html ja té COMMUNITIES i CLIENTS declarats com a `let`
- * amb dades hardcoded. Aquest script:
- *   1. Espera que el DOM estigui llest
- *   2. Fa fetch a /api/communities i /api/clients
- *   3. Buidar les arrays globals i les omple amb les dades de l'API
- *   4. Re-renderitza el dashboard i la taula de clients
+ * Carrega les dades des de l'API (/api/communities, /api/clients, etc.)
+ * i sobreescriu les funcions de CRUD perquè persisteixin a Supabase
+ * via el backend FastAPI.
  *
- * main.py injecta <script src="/static/app.js"> just before </body>
- * sense modificar l'index.html original.
+ * main.py injecta <script src="/static/app.js"> just before </body>.
  */
 
 // ─────────────────────────────────────────────────────────────
-//  Helpers per cridar l'API
+//  Helper genèric per cridar l'API
 // ─────────────────────────────────────────────────────────────
-
-let _dataLoaded = false;
 
 async function apiFetch(path, method = 'GET', body = undefined) {
   const opts = {
@@ -34,151 +28,104 @@ async function apiFetch(path, method = 'GET', body = undefined) {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Carrega les dades i re-renderitza
+//  Carrega dades de l'API i re-renderitza
 // ─────────────────────────────────────────────────────────────
 
 async function loadFromAPI() {
-  // if (_dataLoaded) return;
-  // _dataLoaded = true;
   try {
-    // Fetch en paral·lel
-let communities = [];
-let clients = [];
-let agreements = [];
-let incidents = [];
+    let communities = [];
+    let clients     = [];
+    let agreements  = [];
+    let incidents   = [];
 
-try { communities = await apiFetch('/api/communities'); } catch(e){ console.error(e); }
-try { clients = await apiFetch('/api/clients'); } catch(e){ console.error(e); }
-try { agreements = await apiFetch('/api/agreements'); } catch(e){ console.error(e); }
-try { incidents = await apiFetch('/api/incidents'); } catch(e){ console.error(e); }
+    try { communities = await apiFetch('/api/communities'); } catch(e) { console.error('communities:', e); }
+    try { clients     = await apiFetch('/api/clients');     } catch(e) { console.error('clients:', e); }
+    try { agreements  = await apiFetch('/api/agreements');  } catch(e) { console.error('agreements:', e); }
+    try { incidents   = await apiFetch('/api/incidents');   } catch(e) { console.error('incidents:', e); }
 
-    // Buidar les arrays globals declarades a l'HTML
+    // Buidar i omplir les arrays globals
     COMMUNITIES.splice(0, COMMUNITIES.length);
     CLIENTS.splice(0, CLIENTS.length);
-    if (typeof AGREEMENTS !== 'undefined') {
-      AGREEMENTS.splice(0, AGREEMENTS.length);
-    }
-    if (typeof INCIDENTS !== 'undefined') {
-      INCIDENTS.splice(0, INCIDENTS.length);
-    }
+    if (typeof AGREEMENTS !== 'undefined') AGREEMENTS.splice(0, AGREEMENTS.length);
+    if (typeof INCIDENTS  !== 'undefined') INCIDENTS.splice(0, INCIDENTS.length);
 
-    // Omplir amb les dades de l'API
     communities.forEach(c => COMMUNITIES.push(c));
-    clients.forEach(c => CLIENTS.push(c));
-    if (typeof AGREEMENTS !== 'undefined') {
-      agreements.forEach(a => AGREEMENTS.push(a));
-    }
-    if (typeof INCIDENTS !== 'undefined') {
-      incidents.forEach(i => INCIDENTS.push(i));
-    }
+    clients.forEach(c     => CLIENTS.push(c));
+    if (typeof AGREEMENTS !== 'undefined') agreements.forEach(a => AGREEMENTS.push(a));
+    if (typeof INCIDENTS  !== 'undefined') incidents.forEach(i  => INCIDENTS.push(i));
 
-    // Re-renderitzar tot el frontend amb les noves dades
+    console.log(`✅ Dades carregades: ${COMMUNITIES.length} comunitats, ${CLIENTS.length} clients`);
+
+    // Re-renderitzar la vista actual
     reloadCurrentView && reloadCurrentView();
 
-    // ✅ dropdown segur (fora de problemes de scope)
+    // Dropdown filtre clients
     const dropdown = document.getElementById('filter-comm-clients');
     if (dropdown) {
       dropdown.innerHTML =
         '<option value="">Totes les comunitats</option>' +
         COMMUNITIES.map(c => `<option value="${c.id}">${c.nom} (${c.id})</option>`).join('');
-    }   
-    
-    console.log(
-      `✅ Dades carregades: ${COMMUNITIES.length} comunitats, ${CLIENTS.length} clients`
-    );
-    let statsA = { pendents: 0 };
-    if (typeof getAgreementsStats === 'function') {
-      statsA = getAgreementsStats();
     }
 
-    // KPIs Acords (pantalla acords)
+    // ── KPIs Dashboard ──
+    const elComms   = document.getElementById('kpi-dashboard-comms');
+    const elClients = document.getElementById('kpi-dashboard-clients');
+    const elKW      = document.getElementById('kpi-dashboard-kw');
+    if (elComms)   elComms.textContent   = COMMUNITIES.length;
+    if (elClients) elClients.textContent = CLIENTS.length;
+    if (elKW)      elKW.textContent      = CLIENTS.reduce((s, c) => s + (c.kw || 0), 0).toFixed(1) + ' kW';
+
+    // ── KPIs Acords ──
+    let statsA = { total: 0, pendents: 0, comunitats: 0, firmants: 0 };
+    if (typeof getAgreementsStats === 'function') statsA = getAgreementsStats();
     const elATotal = document.getElementById('kpi-acords-total');
     const elAPend  = document.getElementById('kpi-acords-pendents');
     const elAComm  = document.getElementById('kpi-acords-comunitats');
     const elAFirm  = document.getElementById('kpi-acords-firmants');
-    
     if (elATotal) elATotal.textContent = statsA.total;
     if (elAPend)  elAPend.textContent  = statsA.pendents;
     if (elAComm)  elAComm.textContent  = statsA.comunitats;
     if (elAFirm)  elAFirm.textContent  = statsA.firmants;
-    
     const badgeA = document.getElementById('badge-acords');
     if (badgeA) badgeA.textContent = statsA.pendents;
+    const elAcordsDash = document.getElementById('kpi-dashboard-acords');
+    if (elAcordsDash) elAcordsDash.textContent = statsA.pendents;
 
+    // ── KPIs Errors ──
     let statsI = { totalActives: 0, ambErrors: 0, senseErrors: 0 };
-
-if (typeof getIncidentsStats === 'function') {
-  statsI = getIncidentsStats();
-}
-
-// KPIs Errors
-const elETotal = document.getElementById('kpi-errors-total');
-const elEAmb   = document.getElementById('kpi-errors-amb');
-const elESense = document.getElementById('kpi-errors-sense');
-const elPercent = document.getElementById('kpi-errors-percent');
-
-if (elETotal) elETotal.textContent = statsI.totalActives;
-if (elEAmb)   elEAmb.textContent   = statsI.ambErrors;
-if (elESense) elESense.textContent = statsI.senseErrors;
-
-if (elPercent) {
-  const percent = statsI.totalActives > 0
-    ? (statsI.ambErrors / statsI.totalActives) * 100
-    : 0;
-
-  elPercent.textContent = percent.toFixed(1).replace('.', ',') + '%';
-}
-
-updateIncidentTypeCounters();
-
-// badge sidebar
-    if (elETotal) elETotal.textContent = statsI.totalActives;
-    if (elEAmb)   elEAmb.textContent   = statsI.ambErrors;
-    if (elESense) elESense.textContent = statsI.senseErrors;
-    
+    if (typeof getIncidentsStats === 'function') statsI = getIncidentsStats();
+    const elETotal   = document.getElementById('kpi-errors-total');
+    const elEAmb     = document.getElementById('kpi-errors-amb');
+    const elESense   = document.getElementById('kpi-errors-sense');
+    const elEPercent = document.getElementById('kpi-errors-percent');
+    if (elETotal)   elETotal.textContent   = statsI.totalActives;
+    if (elEAmb)     elEAmb.textContent     = statsI.ambErrors;
+    if (elESense)   elESense.textContent   = statsI.senseErrors;
+    if (elEPercent) {
+      const pct = statsI.totalActives > 0
+        ? (statsI.ambErrors / statsI.totalActives) * 100 : 0;
+      elEPercent.textContent = pct.toFixed(1).replace('.', ',') + '%';
+    }
     const badgeE = document.getElementById('badge-errors');
     if (badgeE) badgeE.textContent = statsI.ambErrors;
+    if (typeof updateIncidentTypeCounters === 'function') updateIncidentTypeCounters();
 
-      // Comunitats
-    const elComms = document.getElementById('kpi-dashboard-comms');
-    if (elComms) elComms.textContent = COMMUNITIES.length;
+    // ── KPIs Clients ──
+    const elClientsComms = document.getElementById('kpi-clients-comms');
+    if (elClientsComms) {
+      elClientsComms.textContent = new Set((CLIENTS || []).map(c => c.comunitat)).size;
+    }
 
-    // Acords pendents
-    const elAcords = document.getElementById('kpi-dashboard-acords');
-    if (elAcords) elAcords.textContent = statsA.pendents;
-
-    // Total clients
-    const elClients = document.getElementById('kpi-dashboard-clients');
-    if (elClients) elClients.textContent = CLIENTS.length;
-
-    // Potència total
-    const totalKW = CLIENTS.reduce((sum, c) => sum + (c.kw || 0), 0);
-    const elKW = document.getElementById('kpi-dashboard-kw');
-    if (elKW) elKW.textContent = totalKW.toFixed(1) + ' kW';
-
-    // ── TOTAL COMUNITATS (a la pantalla de Clients) ──
-// ── TOTAL COMUNITATS (a la pantalla de Clients) ──
-const elClientsComms = document.getElementById('kpi-clients-comms');
-if (elClientsComms) {
-  const total = new Set((CLIENTS || []).map(c => c.comunitat)).size;
-  elClientsComms.textContent = total;
-}
-  
   } catch (err) {
-    console.error('❌ ERROR REAL:', err); // Fallback: continua amb les dades hardcoded que ja hi ha a l'HTML
+    console.error('❌ ERROR loadFromAPI:', err);
   }
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Sobreescriu saveComm i deleteComm perquè persisteixin a l'API
+//  COMUNITATS — saveComm
 // ─────────────────────────────────────────────────────────────
 
-// ── COMUNITATS ──────────────────────────────────────────────
-
-const _origSaveComm = window.saveComm;
-
 window.saveComm = async function () {
-  // 1. Validació i construcció de l'objecte (reutilitzem la lògica original)
   const nom      = document.getElementById('c-nom').value.trim();
   const promotor = document.getElementById('c-promotor').value.trim();
   const potencia = parseFloat(document.getElementById('c-potencia').value) || 0;
@@ -191,26 +138,40 @@ window.saveComm = async function () {
   }
   errEl.textContent = '';
 
-  const id  = editingCommId || document.getElementById('c-id').value;
-  const lat = parseFloat(document.getElementById('c-lat').value) || 41.50;
-  const lng = parseFloat(document.getElementById('c-lng').value) || 2.00;
-  const fiRaw = document.getElementById('c-fi').value;
-  const fi    = fiRaw ? fiRaw.split('-').reverse().join('/') : '31/12/2026';
+  const id     = editingCommId || document.getElementById('c-id').value;
+  const lat    = parseFloat(document.getElementById('c-lat').value) || 41.50;
+  const lng    = parseFloat(document.getElementById('c-lng').value) || 2.00;
+  const fiRaw  = document.getElementById('c-fi').value;
+  const fi     = fiRaw ? fiRaw.split('-').reverse().join('/') : '31/12/2026';
+
+  // Camps de la instal·lació FV (opcionals per compatibilitat)
+  const orientacio   = document.getElementById('c-orientacio')?.value.trim()   || '';
+  const inclinacio   = parseInt(document.getElementById('c-inclinacio')?.value)  || 0;
+  const produccio    = parseFloat(document.getElementById('c-produccio')?.value) || 0;
+  const cupsGen      = document.getElementById('c-cups-gen')?.value.trim()      || '';
+  const invMarca     = document.getElementById('c-inversor-marca')?.value.trim() || '';
+  const invModel     = document.getElementById('c-inversor-model')?.value.trim() || '';
 
   const commObj = {
     id, nom, promotor,
-    contacte:        document.getElementById('c-contacte').value.trim() || promotor,
-    email:           document.getElementById('c-email').value.trim(),
-    telefon:         document.getElementById('c-tel').value.trim(),
-    adreca:          document.getElementById('c-adreca').value.trim(),
-    potencia:        potencia,
-    onboarding:      document.getElementById('c-onboarding').value,
-    acord_reparto:   document.getElementById('c-acord').value,
-    fi_inscripcions: fi,
-    informe_auto:    document.getElementById('c-informe').value,
-    marca_blanca:    document.getElementById('c-marca').value,
+    contacte:              document.getElementById('c-contacte').value.trim() || promotor,
+    email:                 document.getElementById('c-email').value.trim(),
+    telefon:               document.getElementById('c-tel').value.trim(),
+    adreca:                document.getElementById('c-adreca').value.trim(),
+    potencia,
+    orientacio,
+    inclinacio,
+    producció_anual_kwh:   produccio,
+    cups_generacio:        cupsGen,
+    inversor_marca:        invMarca,
+    inversor_model:        invModel,
+    onboarding:            document.getElementById('c-onboarding').value,
+    acord_reparto:         document.getElementById('c-acord').value,
+    fi_inscripcions:       fi,
+    informe_auto:          document.getElementById('c-informe').value,
+    marca_blanca:          document.getElementById('c-marca').value,
     lat, lng,
-    color:           document.getElementById('c-color').value || '#1B4D31',
+    color:                 document.getElementById('c-color').value || '#1B4D31',
     clients_actius: 0, inscrits: 0,
     cups_auth_actius: 0, cups_auth_proposats: 0,
     sense_auth: 0, datadis_actius: 0,
@@ -219,44 +180,66 @@ window.saveComm = async function () {
     total_estalvi: 0, total_kw: potencia, total_clients: 0,
   };
 
-  // 2. Recollir files de clients del modal
+  // ── Llegir files de clients del pas 2 ──
   const rows = document.querySelectorAll('#client-rows-body .client-table-row');
   const newClients = [];
   rows.forEach((row, i) => {
-    const r    = row.id.replace('crow-', '');
-    const nomCl = document.getElementById(`cr-nom-${r}`)?.value.trim();
-    if (!nomCl) return;
-    const codi = row.dataset.codi || `${id.replace('C', '')}${String(i + 1).padStart(3, '0')}`;
-    const kw   = parseFloat(document.getElementById(`cr-kw-${r}`)?.value) || 0;
-    const cups = document.getElementById(`cr-cups-${r}`)?.value.trim();
+    const r      = row.id.replace('crow-', '');
+    const nomCl  = document.getElementById(`cr-nom-${r}`)?.value.trim();
+    if (!nomCl) return; // fila buida → ignorar
+    const codi   = row.dataset.codi || `${id.replace('C', '')}${String(i + 1).padStart(3, '0')}`;
+    const kw     = parseFloat(document.getElementById(`cr-kw-${r}`)?.value) || 0;
+    const cups   = document.getElementById(`cr-cups-${r}`)?.value.trim() || null;
+    const preu   = parseFloat(document.getElementById(`cr-preu-${r}`)?.value) || 0;
+    const costFix = parseFloat(document.getElementById(`cr-cost-${r}`)?.value) || 0;
+    const pctAuto = parseFloat(document.getElementById(`cr-auto-${r}`)?.value) || 0;
+    const kwh    = kw * 1500;
+    const estalvi_brut = preu * kwh;
+    const cost_anual   = costFix * kw * 12;
+    const preu_kwh     = kwh > 0 ? cost_anual / kwh : 0;
+    const pct_estalvi  = estalvi_brut > 0 ? cost_anual / estalvi_brut : 0;
+
     newClients.push({
-      codi, nom: nomCl,
-      nif:   document.getElementById(`cr-nif-${r}`)?.value.trim()   || '',
-      cups_consum:  cups || '—',
-      tel:   document.getElementById(`cr-tel-${r}`)?.value.trim()   || '',
-      email: document.getElementById(`cr-email-${r}`)?.value.trim() || '',
-      inici_fact: '1900-01-01', baixa: null, app: 'No',
-      estat: document.getElementById(`cr-estat-${r}`)?.value || 'Proposat',
-      modalitat: 'Ahorra sempre', perfil: 'F', comercialitzadora: '0091', import_eur: 0,
-      comunitat: id, kw, kwh: kw * 1500,
-      preu_llum: 0, estalvi_brut: 0, cost_fix: kw * 12,
-      preu_kwh: 0.088, pct_estalvi: null, periode: 0,
-      cups_auth: cups ? 'OK' : 'Falten', cups_auth_note: cups ? '' : 'Pendent',
-      autoconsum: 0, datadis: 'Actiu', dades_recents: 'Sense dades', sense_auto: 'OK',
+      codi,
+      nom:          nomCl,
+      nif:          document.getElementById(`cr-nif-${r}`)?.value.trim()            || '',
+      cups_consum:  cups,
+      comercialitzadora: document.getElementById(`cr-comercialitzadora-${r}`)?.value.trim() || '',
+      tel:          document.getElementById(`cr-tel-${r}`)?.value.trim()            || '',
+      email:        document.getElementById(`cr-email-${r}`)?.value.trim()          || '',
+      inici_fact:   null,
+      baixa:        null,
+      app:          'No',
+      estat:        document.getElementById(`cr-estat-${r}`)?.value || 'Proposat',
+      modalitat:    'Ahorra sempre',
+      perfil:       'F',
+      import_eur:   0,
+      comunitat:    id,
+      kw, kwh,
+      preu_llum:    preu,
+      cost_fix:     costFix,
+      estalvi_brut,
+      preu_kwh,
+      pct_estalvi:  pct_estalvi * 100,
+      periode:      0,
+      cups_auth:    cups ? 'OK' : 'Falten',
+      cups_auth_note: cups ? '' : 'Pendent',
+      autoconsum:   pctAuto,
+      datadis:      'Desconegut',
+      dades_recents: 'Sense dades',
+      sense_auto:   'OK',
     });
   });
 
   commObj.total_clients = newClients.length;
   commObj.total_kw      = newClients.reduce((s, c) => s + c.kw, 0) || potencia;
 
-  // 3. Persistir a l'API
+  // ── Cridar l'API ──
   try {
     if (editingCommId) {
       await apiFetch(`/api/communities/${editingCommId}`, 'PUT', commObj);
-      // Actualitzar clients existents + afegir nous
-      const existingCodis = CLIENTS
-        .filter(c => c.comunitat === editingCommId)
-        .map(c => c.codi);
+      // Actualitzar clients existents o afegir nous
+      const existingCodis = CLIENTS.filter(c => c.comunitat === editingCommId).map(c => c.codi);
       for (const cl of newClients) {
         if (existingCodis.includes(cl.codi)) {
           await apiFetch(`/api/clients/${cl.codi}`, 'PUT', cl);
@@ -268,7 +251,11 @@ window.saveComm = async function () {
     } else {
       await apiFetch('/api/communities', 'POST', commObj);
       for (const cl of newClients) {
-        await apiFetch('/api/clients', 'POST', cl);
+        try {
+          await apiFetch('/api/clients', 'POST', cl);
+        } catch (clientErr) {
+          console.warn('Client no guardat:', cl.codi, clientErr.message);
+        }
       }
       showToast('✅ Comunitat creada i guardada');
     }
@@ -277,15 +264,14 @@ window.saveComm = async function () {
     return;
   }
 
-  // 4. Recarregar dades i tancar modal
   closeModal('modal-comm');
   await loadFromAPI();
   if (typeof reloadCurrentView === 'function') reloadCurrentView();
 };
 
 // ─────────────────────────────────────────────────────────────
-
-const _origDeleteComm = window.deleteComm;
+//  COMUNITATS — deleteComm
+// ─────────────────────────────────────────────────────────────
 
 window.deleteComm = async function (id, event) {
   if (event) event.stopPropagation();
@@ -303,7 +289,6 @@ window.deleteComm = async function (id, event) {
         showToast(`⚠ Error: ${err.message}`, 'err');
         return;
       }
-      // Netejar mapa si existeix
       if (typeof detailMaps !== 'undefined' && detailMaps[id]) {
         try { detailMaps[id].remove(); } catch (e) {}
         delete detailMaps[id];
@@ -313,15 +298,15 @@ window.deleteComm = async function (id, event) {
   );
 };
 
-// ── CLIENTS ─────────────────────────────────────────────────
-
-const _origSaveClient = window.saveClient;
+// ─────────────────────────────────────────────────────────────
+//  CLIENTS — saveClient
+// ─────────────────────────────────────────────────────────────
 
 window.saveClient = async function (e) {
   if (e) e.preventDefault();
-  const nom  = document.getElementById('cl-nom').value.trim();
-  const nif  = document.getElementById('cl-nif').value.trim();
-  const kw   = parseFloat(document.getElementById('cl-kw').value) || 0;
+  const nom   = document.getElementById('cl-nom').value.trim();
+  const nif   = document.getElementById('cl-nif').value.trim();
+  const kw    = parseFloat(document.getElementById('cl-kw').value) || 0;
   const errEl = document.getElementById('modal-client-err');
 
   if (!nom || !nif || !kw) {
@@ -330,9 +315,17 @@ window.saveClient = async function (e) {
   }
   errEl.textContent = '';
 
-  const cups = document.getElementById('cl-cups').value.trim();
+  const cups     = document.getElementById('cl-cups').value.trim() || null;
+  const preu     = parseFloat(document.getElementById('cl-preu')?.value) || 0;
+  const costFix  = parseFloat(document.getElementById('cl-cost')?.value) || 0;
+  const pctAuto  = parseFloat(document.getElementById('cl-auto')?.value) || 0;
+  const kwh      = kw * 1500;
+  const estalvi_brut = preu * kwh;
+  const cost_anual   = costFix * kw * 12;
+  const preu_kwh     = kwh > 0 ? cost_anual / kwh : 0;
+
   const codi = editingClientCodi || (() => {
-    const prefix = editingClientCommId ? editingClientCommId.replace('C', '') : '000';
+    const prefix   = editingClientCommId ? editingClientCommId.replace('C', '') : '000';
     const existing = CLIENTS.filter(c => c.comunitat === editingClientCommId)
       .map(c => parseInt(c.codi.slice(-3))).filter(n => !isNaN(n));
     const max = existing.length ? Math.max(...existing) : 0;
@@ -340,72 +333,55 @@ window.saveClient = async function (e) {
   })();
 
   const clientObj = {
-  codi, nom, nif,
+    codi, nom, nif,
+    cups_consum:   cups,
+    tel:           document.getElementById('cl-tel').value.trim() || null,
+    email:         document.getElementById('cl-email').value.trim(),
+    inici_fact:    document.getElementById('cl-inici')?.value || null,
+    baixa:         document.getElementById('cl-baixa')?.value  || null,
+    app:           document.getElementById('cl-app')?.value    || 'No',
+    estat:         document.getElementById('cl-estat').value,
+    modalitat:     document.getElementById('cl-modalitat').value,
+    perfil:        document.getElementById('cl-perfil').value,
+    comercialitzadora: document.getElementById('cl-comercialitzadora')?.value || null,
+    import_eur:    parseFloat(document.getElementById('cl-import')?.value) || 0,
+    comunitat:     editingClientCommId,
+    kw, kwh,
+    preu_llum:     preu,
+    cost_fix:      costFix,
+    estalvi_brut,
+    preu_kwh,
+    pct_estalvi:   estalvi_brut > 0 ? cost_anual / estalvi_brut : null,
+    periode:       0,
+    autoconsum:    pctAuto,
+    cups_auth:     cups ? 'OK' : 'Falten',
+    cups_auth_note: cups ? '' : 'Pendent',
+    datadis:       'Desconegut',
+    dades_recents: 'Sense dades',
+    sense_auto:    'OK',
+  };
 
-  cups_consum: cups || null,
-  tel: document.getElementById('cl-tel').value.trim() || null,
-  email: document.getElementById('cl-email').value.trim(),
-  inici_fact: document.getElementById('cl-inici')?.value || null,
-  baixa: document.getElementById('cl-baixa')?.value || null,
-  app: document.getElementById('cl-app')?.value || 'No',
-  estat: document.getElementById('cl-estat').value,
-  modalitat: document.getElementById('cl-modalitat').value,
-  perfil: document.getElementById('cl-perfil').value,
-  comercialitzadora: document.getElementById('cl-comercialitzadora')?.value || null,
-  import_eur: parseFloat(document.getElementById('cl-import')?.value) || 0,
-  comunitat: editingClientCommId,
-  kw,
-  kwh: kw * 1500,
-  preu_llum: parseFloat(document.getElementById('cl-preu')?.value) || 0,
-  cost_fix: parseFloat(document.getElementById('cl-cost')?.value) || 0,
-  autoconsum: parseFloat(document.getElementById('cl-auto')?.value) || 0,
-  estalvi_brut: 0,
-  preu_kwh: 0,
-  pct_estalvi: null,
-  capacitat_estalvi: 0,
-  percent_capacitat_estalvi: 0,
-  estalvi_amb_autoconsum_anterior: 0,
-  cups_auth: cups ? 'OK' : 'Falten',
-  cups_auth_note: cups ? '' : 'Pendent',
-  datadis: 'Desconegut',
-  dades_recents: 'Sense dades',
-  sense_auto: 'OK'
-};
-
-try {
-  console.log("Enviant client a API:", clientObj);
-
-  if (editingClientCodi) {
-    await apiFetch(`/api/clients/${editingClientCodi}`, 'PUT', clientObj);
-    showToast('✅ Participant actualitzat i guardat');
-  } else {
-    await apiFetch('/api/clients', 'POST', clientObj);
-    showToast('✅ Participant afegit i guardat');
+  try {
+    if (editingClientCodi) {
+      await apiFetch(`/api/clients/${editingClientCodi}`, 'PUT', clientObj);
+      showToast('✅ Participant actualitzat i guardat');
+    } else {
+      await apiFetch('/api/clients', 'POST', clientObj);
+      showToast('✅ Participant afegit i guardat');
+    }
+  } catch (err) {
+    errEl.textContent = `⚠ Error de l'API: ${err.message}`;
+    return;
   }
-
-} catch (err) {
-  console.error("❌ ERROR API:", err);
-  errEl.textContent = `⚠ Error de l'API: ${err.message}`;
-  return;
-}
 
   closeModal('modal-client');
   await loadFromAPI();
   reloadCurrentView();
-  // Re-renderitzar el detall si estem al detall de la comunitat
-  if (
-    typeof currentView !== 'undefined' &&
-    currentView === 'comunitat-detail' &&
-    typeof currentCommunity !== 'undefined' &&
-    currentCommunity === editingClientCommId
-  ) {
-    renderCommunityDetail(editingClientCommId);
-  }
 };
 
 // ─────────────────────────────────────────────────────────────
-
-const _origDeleteClient = window.deleteClient;
+//  CLIENTS — deleteClient
+// ─────────────────────────────────────────────────────────────
 
 window.deleteClient = async function (codi, event) {
   if (event) event.stopPropagation();
@@ -426,10 +402,8 @@ window.deleteClient = async function (codi, event) {
       const commId = cl.comunitat;
       await loadFromAPI();
       if (
-        typeof currentView !== 'undefined' &&
-        currentView === 'comunitat-detail' &&
-        typeof currentCommunity !== 'undefined' &&
-        currentCommunity === commId
+        typeof currentView     !== 'undefined' && currentView === 'comunitat-detail' &&
+        typeof currentCommunity !== 'undefined' && currentCommunity === commId
       ) {
         renderCommunityDetail(commId);
       }
@@ -437,175 +411,204 @@ window.deleteClient = async function (codi, event) {
   );
 };
 
-// ─────────────────────────────────────────────
-// STATS GLOBALS (calculats des de Supabase)
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+//  STATS (calculats des de les dades de Supabase)
+// ─────────────────────────────────────────────────────────────
 
 function getClientsByCommunity(commId) {
   return CLIENTS.filter(c => c.comunitat === commId);
 }
 
 function getAgreementsStats() {
-  const total = AGREEMENTS.length;
-
-  const pendents = AGREEMENTS.filter(a =>
-    (a.estat || '').toLowerCase() === 'pendent'
-  ).length;
-
-  const comunitats = new Set(
-    AGREEMENTS.map(a => a.comunitat).filter(Boolean)
-  ).size;
-
-  const firmants = AGREEMENTS.length;
-
+  const total     = AGREEMENTS.length;
+  const pendents  = AGREEMENTS.filter(a => (a.estat || '').toLowerCase() === 'pendent').length;
+  const comunitats = new Set(AGREEMENTS.map(a => a.comunitat).filter(Boolean)).size;
+  const firmants   = AGREEMENTS.length;
   return { total, pendents, comunitats, firmants };
 }
 
 function getIncidentsStats() {
-  const totalActives = COMMUNITIES.length;
-
-  const incidentsActius = INCIDENTS.filter(i =>
-    (i.estat || '').toLowerCase() === 'pendent'
-  );
-
-  const ambErrors = new Set(
-    incidentsActius.map(i => i.comunitat).filter(Boolean)
-  ).size;
-
-  const senseErrors = totalActives - ambErrors;
-
+  const totalActives  = COMMUNITIES.length;
+  const incidentsActius = INCIDENTS.filter(i => (i.estat || '').toLowerCase() === 'pendent');
+  const ambErrors     = new Set(incidentsActius.map(i => i.comunitat).filter(Boolean)).size;
+  const senseErrors   = totalActives - ambErrors;
   return { totalActives, ambErrors, senseErrors };
 }
 
-function getIncidentsByType() {
-  const map = {};
-  INCIDENTS.forEach(i => {
-    const tipus = i.tipus || 'Altres';
-    map[tipus] = (map[tipus] || 0) + 1;
-  });
-  return map;
-}
-
 function normalizeTipus(t) {
-  return (t || '')
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '_');
+  return (t || '').toLowerCase().trim().replace(/\s+/g, '_');
 }
 
 function updateIncidentTypeCounters() {
-  const pendents = INCIDENTS.filter(i =>
-    (i.estat || '').toLowerCase() === 'pendent'
-  );
-
+  const pendents = INCIDENTS.filter(i => (i.estat || '').toLowerCase() === 'pendent');
   const counts = {
     falta_dades: pendents.filter(i => normalizeTipus(i.tipus) === 'falta_dades').length,
     sense_gen:   pendents.filter(i => normalizeTipus(i.tipus) === 'sense_gen').length,
     baixada:     pendents.filter(i => normalizeTipus(i.tipus) === 'baixada').length,
-    multiple:    pendents.filter(i => normalizeTipus(i.tipus) === 'multiple').length
+    multiple:    pendents.filter(i => normalizeTipus(i.tipus) === 'multiple').length,
   };
-
   const el1 = document.getElementById('count-falta-dades');
   const el2 = document.getElementById('count-sense-gen');
   const el3 = document.getElementById('count-baixada');
   const el4 = document.getElementById('count-multiple');
-
   if (el1) el1.textContent = counts.falta_dades;
   if (el2) el2.textContent = counts.sense_gen;
   if (el3) el3.textContent = counts.baixada;
   if (el4) el4.textContent = counts.multiple;
 }
 
-// ─────────────────────────────────────────────
-// ENERGY (gràfiques)
-// ─────────────────────────────────────────────
-
-function renderEnergyChart(data) {
-  const ctx = document.getElementById('chart-energy');
-
-  if (!ctx) return;
-
-  if (energyChart) energyChart.destroy();
-
-  energyChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: data.labels,
-      datasets: [
-        { label: 'Autoconsum', data: data.autoconsum },
-        { label: 'Excedent', data: data.excedent }
-      ]
-    },
-    options: {
-      responsive: true
-    }
-  });
-}
+// ─────────────────────────────────────────────────────────────
+//  ENERGIA — gràfics i estadístiques
+// ─────────────────────────────────────────────────────────────
 
 async function updateCommunityEnergy(commId) {
-  const start = document.getElementById(`estalvi-start-${commId}`)?.value;
-  const end   = document.getElementById(`estalvi-end-${commId}`)?.value;
-  const canvas = document.getElementById(`chart-estalvi-${commId}`);
-
-  if (!canvas) return;
+  const startEl = document.getElementById(`estalvi-start-${commId}`);
+  const endEl   = document.getElementById(`estalvi-end-${commId}`);
+  const start   = startEl?.value;
+  const end     = endEl?.value;
 
   try {
+    // Construir URL — envia qualsevol filtre disponible (un o els dos)
     let url = `/api/energy/${commId}`;
-
-    if (start && end) {
-      url += `?start=${start}&end=${end}`;
-    }
+    const params = [];
+    if (start) params.push(`start=${start}`);
+    if (end)   params.push(`end=${end}`);
+    if (params.length) url += '?' + params.join('&');
 
     const data = await apiFetch(url);
+    console.log('ENERGY API:', data);
 
-    console.log("ENERGY API:", data);
-
-    const labels = data.labels || [];
+    const labels   = data.labels   || [];
     const autoData = data.autoconsum || [];
-    const excData  = data.excedent || [];
+    const excData  = data.excedent  || [];
+    const estalvi  = data.estalvi_total || 0;
 
-// 🔥 destruir qualsevol chart existent (IMPORTANT)
-if (typeof charts !== 'undefined' && charts[`estalvi-${commId}`]) {
-  try {
-    charts[`estalvi-${commId}`].destroy();
-  } catch(e) {}
-  delete charts[`estalvi-${commId}`];
-}
+    // Totals acumulats
+    const totalAuto = autoData.reduce((s, v) => s + v, 0);
+    const totalExc  = excData.reduce((s, v) => s + v, 0);
 
-// també per si existeix el local
-if (canvas._chart) {
-  try {
-    canvas._chart.destroy();
-  } catch(e) {}
-}
+    // Opcions comunes dels gràfics
+    const mkChartOpts = (yLabel) => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        y: {
+          grid: { color: '#E3E8E3' },
+          ticks: {
+            font: { size: 10 },
+            callback: v => v.toLocaleString('ca-ES') + (yLabel === 'kWh' ? ' kWh' : ' €'),
+          },
+        },
+      },
+    });
 
-const ctx = canvas.getContext('2d');
+    const mkDatasets = (aData, eData) => ([
+      {
+        label: 'Autoconsum', data: aData,
+        backgroundColor: 'rgba(62,171,107,0.75)',
+        borderRadius: 4, borderSkipped: false,
+      },
+      {
+        label: 'Excedent', data: eData,
+        backgroundColor: 'rgba(43,108,176,0.65)',
+        borderRadius: 4, borderSkipped: false,
+      },
+    ]);
 
-canvas._chart = new Chart(ctx, {
-  type: 'line',
-  data: {
-    labels,
-    datasets: [
-      { label: 'Autoconsum', data: autoData },
-      { label: 'Excedent', data: excData }
-    ]
-  }
-});
+    // ── Gràfic estalvi (€) ──
+    const cEstalvi = document.getElementById(`chart-estalvi-${commId}`);
+    if (cEstalvi) {
+      if (charts[`estalvi-${commId}`]) {
+        try { charts[`estalvi-${commId}`].destroy(); } catch(e) {}
+      }
+      charts[`estalvi-${commId}`] = new Chart(cEstalvi, {
+        type: 'bar',
+        data: { labels, datasets: mkDatasets(autoData, excData) },
+        options: mkChartOpts('€'),
+      });
+    }
 
-// estalvi total
-const el = document.getElementById(`estalvi-total-${commId}`);
-if (el) {
-  el.textContent = (data.estalvi_total || 0).toFixed(2) + ' €';
-}
+    // ── Gràfic eficiència (kWh) ──
+    const cEfic = document.getElementById(`chart-efic-${commId}`);
+    if (cEfic) {
+      if (charts[`efic-${commId}`]) {
+        try { charts[`efic-${commId}`].destroy(); } catch(e) {}
+      }
+      charts[`efic-${commId}`] = new Chart(cEfic, {
+        type: 'bar',
+        data: { labels, datasets: mkDatasets(autoData, excData) },
+        options: mkChartOpts('kWh'),
+      });
+    }
+
+    // ── Actualitzar valors dels panells ──
+
+    // Rendiment tab header
+    const elRT = document.getElementById(`estalvi-total-${commId}`);
+    if (elRT) elRT.textContent = estalvi.toFixed(2).replace('.', ',') + ' €';
+
+    // Panell Estalvi (IDs afegits al template)
+    const elSTotal = document.getElementById(`estalvi-stat-total-${commId}`);
+    const elSAuto  = document.getElementById(`estalvi-stat-auto-${commId}`);
+    const elSExc   = document.getElementById(`estalvi-stat-exc-${commId}`);
+    if (elSTotal) elSTotal.textContent = estalvi.toFixed(2).replace('.', ',') + ' €';
+    if (elSAuto)  elSAuto.textContent  = totalAuto.toFixed(2).replace('.', ',') + ' €';
+    if (elSExc)   elSExc.textContent   = totalExc.toFixed(2).replace('.', ',') + ' €';
+
+    // Panell Eficiència (IDs afegits al template)
+    const elEAuto  = document.getElementById(`efic-stat-auto-${commId}`);
+    const elEExc   = document.getElementById(`efic-stat-exc-${commId}`);
+    const elEPct   = document.getElementById(`efic-stat-pct-${commId}`);
+    if (elEAuto) elEAuto.textContent = totalAuto.toFixed(0) + ' kWh';
+    if (elEExc)  elEExc.textContent  = totalExc.toFixed(0) + ' kWh';
+    if (elEPct) {
+      const total = totalAuto + totalExc;
+      const pct = total > 0 ? (totalAuto / total * 100).toFixed(1) : '0,0';
+      elEPct.textContent = pct.replace('.', ',') + '%';
+    }
 
   } catch (err) {
-  console.error("❌ Error carregant energia:", err);
-
-  const canvas = document.getElementById(`chart-estalvi-${commId}`);
-  if (canvas) {
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    console.error('❌ Error carregant energia:', err);
   }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  EXPORT CSV
+// ─────────────────────────────────────────────────────────────
+
+function downloadCSV(data, filename = 'export.csv') {
+  if (!data || !data.length) {
+    alert('No hi ha dades per exportar');
+    return;
+  }
+  const headers = Object.keys(data[0]);
+  const csv = [
+    headers.join(','),
+    ...data.map(row =>
+      headers.map(h => `"${(row[h] ?? '').toString().replace(/"/g, '""')}"`).join(',')
+    ),
+  ].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportClientsVisible() {
+  const select = document.getElementById('filter-comm-clients');
+  const data   = (select && select.value)
+    ? CLIENTS.filter(c => c.comunitat === select.value)
+    : CLIENTS;
+  downloadCSV(data, 'clients.csv');
+}
+
+function exportCommunitiesAll() {
+  downloadCSV(COMMUNITIES, 'communities.csv');
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -613,55 +616,6 @@ if (el) {
 // ─────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log("🚀 Web carregada — carregant dades del backend...");
+  console.log('🚀 Web carregada — carregant dades del backend...');
   loadFromAPI();
 });
-
-// ─────────────────────────────────────────────
-// EXPORT CSV (genèric)
-// ─────────────────────────────────────────────
-function downloadCSV(data, filename = "export.csv") {
-  if (!data || !data.length) {
-    alert("No hi ha dades per exportar");
-    return;
-  }
-
-  const headers = Object.keys(data[0]);
-
-  const csv = [
-    headers.join(","),
-    ...data.map(row =>
-      headers.map(h => `"${(row[h] ?? "").toString().replace(/"/g, '""')}"`).join(",")
-    )
-  ].join("\n");
-
-  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-
-  a.href = url;
-  a.download = filename;
-  a.click();
-
-  URL.revokeObjectURL(url);
-}
-
-
-// ── EXPORTAR CLIENTS SEGONS FILTRE ──
-function exportClientsVisible() {
-  const select = document.getElementById("filter-comm-clients");
-  let data = CLIENTS;
-
-  if (select && select.value) {
-    data = CLIENTS.filter(c => c.comunitat === select.value);
-  }
-
-  downloadCSV(data, "clients.csv");
-}
-
-
-// ── EXPORTAR COMUNITATS ──
-function exportCommunitiesAll() {
-  downloadCSV(COMMUNITIES, "communities.csv");
-}
