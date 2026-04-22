@@ -227,11 +227,11 @@ def get_energy(comm_id: str, start: str = None, end: str = None):
     # 3. filtres dates
     if start:
     y, m = map(int, start.split("-"))
-    query = query.or_(f"year.gt.{y},and(year.eq.{y},month.gte.{m})")
+    query = query.gte("year", y).gte("month", m)
     
     if end:
     y, m = map(int, end.split("-"))
-    query = query.or_(f"year.lt.{y},and(year.eq.{y},month.lte.{m})")
+    query = query.lte("year", y).lte("month", m)
 
     res = query.order("year", desc=False).order("month", desc=False).execute()
     rows = res.data
