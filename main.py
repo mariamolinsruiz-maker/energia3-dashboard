@@ -216,6 +216,8 @@ def get_energy(comm_id: str, start: str = None, end: str = None):
     clients_res = supabase.table("clients").select("codi").eq("comunitat", comm_id).execute()
     client_codis = [c["codi"] for c in clients_res.data]
 
+    print("CLIENT CODIS:", client_codis)
+
     if not client_codis:
         return {"labels": [], "autoconsum": [], "excedent": [], "estalvi_total": 0}
 
@@ -224,15 +226,17 @@ def get_energy(comm_id: str, start: str = None, end: str = None):
 
     # 3. filtres dates
     if start:
-        y, m = map(int, start.split("-"))
-        query = query.gte("year", y).gte("month", m)
-
+    y, m = map(int, start.split("-"))
+    query = query.or_(f"year.gt.{y},and(year.eq.{y},month.gte.{m})")
+    
     if end:
-        y, m = map(int, end.split("-"))
-        query = query.lte("year", y).lte("month", m)
+    y, m = map(int, end.split("-"))
+    query = query.or_(f"year.lt.{y},and(year.eq.{y},month.lte.{m})")
 
-    res = query.order("year").order("month").execute()
+    res = query.order("year", desc=False).order("month", desc=False).execute()
     rows = res.data
+
+    print("ROWS ENERGY:", len(rows))
 
     # 4. agrupar per mes
     data_by_month = {}
