@@ -1286,7 +1286,7 @@ document.getElementById('detail-content').innerHTML = `
                <div style="font-size:0.68rem;color:var(--text-light);margin-bottom:2px;">Mes fi</div>
                <input type="month" class="date-input" id="estalvi-end-${id}" onchange="updateCommunityEnergy('${id}')">
              </div>
-             <button class="btn btn-ghost btn-sm" style="margin-top:14px;" onclick="clearDates('estalvi-'+id)">Netejar</button>
+             <button class="btn btn-ghost btn-sm" style="margin-top:14px;" onclick="clearDates('${id}')">Netejar</button>
            </div>
            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;">
              <button class="btn btn-ghost btn-sm" style="border-color:var(--g300);color:var(--g700)" onclick="setDateRange('estalvi-start-${id}','estalvi-end-${id}',1)">Últim mes</button>
@@ -1298,16 +1298,16 @@ document.getElementById('detail-content').innerHTML = `
            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.6rem;margin-bottom:1rem;">
              <div style="border:1px solid var(--g200);border-radius:var(--radius-sm);padding:0.75rem;background:var(--g50);">
                <div style="font-size:0.68rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;">Estalvi total</div>
-               <div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--g700)">0,00 €</div>
+               <div id="estalvi-stat-total-${id}" style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--g700)">0,00 €</div>
              </div>
              <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.75rem;">
                <div style="font-size:0.68rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;">Autoconsum</div>
-               <div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;">0,00 €</div>
+               <div id="estalvi-stat-auto-${id}" style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;">0,00 €</div>
                <div style="font-size:0.7rem;color:var(--text-light)">0,0%</div>
              </div>
              <div style="border:1px solid var(--blue-bg);border-radius:var(--radius-sm);padding:0.75rem;background:var(--blue-bg);">
                <div style="font-size:0.68rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;">Excedent</div>
-               <div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--blue)">0,00 €</div>
+               <div id="estalvi-stat-exc-${id}" style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--blue)">0,00 €</div>
                <div style="font-size:0.7rem;color:var(--text-light)">0,0%</div>
              </div>
            </div>
@@ -1356,16 +1356,16 @@ document.getElementById('detail-content').innerHTML = `
            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.6rem;margin-bottom:1rem;">
              <div style="border:1px solid var(--g200);border-radius:var(--radius-sm);padding:0.75rem;background:var(--g50);">
                <div style="font-size:0.68rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;">% Autoconsum</div>
-               <div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--g700)">0,0%</div>
+               <div id="efic-stat-pct-${id}" style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--g700)">0,0%</div>
              </div>
              <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.75rem;">
                <div style="font-size:0.68rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;">Autoconsum</div>
-               <div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;">0,00 kWh</div>
+               <div id="efic-stat-auto-${id}" style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;">0,00 kWh</div>
                <div style="font-size:0.7rem;color:var(--text-light)">0,0%</div>
              </div>
              <div style="border:1px solid var(--blue-bg);border-radius:var(--radius-sm);padding:0.75rem;background:var(--blue-bg);">
                <div style="font-size:0.68rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;">Excedent</div>
-               <div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--blue)">0,00 kWh</div>
+               <div id="efic-stat-exc-${id}" style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--blue)">0,00 kWh</div>
                <div style="font-size:0.7rem;color:var(--text-light)">0,0%</div>
              </div>
            </div>
@@ -1612,8 +1612,9 @@ const rawOff = [
 
 clients.forEach((c, i) => {
 const off = rawOff[i % rawOff.length];
-const lat = comm.lat + off[0];
-const lng = comm.lng + off[1];
+// Usar coordenades reals si estan disponibles al DB, sinó offset des de la instal·lació
+const lat = (c.lat && c.lat !== 0) ? c.lat : comm.lat + off[0];
+const lng = (c.long && c.long !== 0) ? c.long : (c.lng && c.lng !== 0) ? c.lng : comm.lng + off[1];
 
 // Colour-code by status
 const dotColor = c.estat==='Actiu'?'#2D8452': c.estat==='Proposat'?'#C8973A':'#2B6CB0';
@@ -1847,6 +1848,17 @@ const sEl = document.getElementById(startId);
 const eEl = document.getElementById(endId);
 if (sEl) sEl.value = startD;
 if (eEl) eEl.value = end;
+// Refresca el gràfic d'energia automàticament
+const commId = startId.replace('estalvi-start-', '');
+if (typeof updateCommunityEnergy === 'function') updateCommunityEnergy(commId);
+}
+
+function clearDates(commId) {
+const start = document.getElementById(`estalvi-start-${commId}`);
+const end   = document.getElementById(`estalvi-end-${commId}`);
+if (start) start.value = '';
+if (end)   end.value   = '';
+if (typeof updateCommunityEnergy === 'function') updateCommunityEnergy(commId);
 }
 
 function selectIncidentType(el, type) {
@@ -2045,7 +2057,7 @@ div.innerHTML = `
   </select>
   <input id="cr-cost-${r}" type="number" placeholder="€/kW" />
   <input id="cr-auto-${r}" type="number" placeholder="%Auto" />
-  <button onclick="removeClientRow(this)">✕</button>
+  <button onclick="removeClientRow(${r})">✕</button>
 `;
 
 document.getElementById('client-rows-body').appendChild(div);
@@ -2059,18 +2071,21 @@ div.className = 'client-table-row';
 div.id = 'crow-' + r;
 div.dataset.codi = cl.codi;
 div.innerHTML = `
-   <input value="${cl.nom}" id="cr-nom-${r}">
-   <input value="${cl.nif}" id="cr-nif-${r}">
-   <input value="${cl.cups_consum}" id="cr-cups-${r}">
-   <input type="number" value="${cl.kw}" id="cr-kw-${r}">
-   <input type="email" value="${cl.email}" id="cr-email-${r}">
-   <input value="${cl.tel}" id="cr-tel-${r}">
+   <input value="${cl.nom || ''}" id="cr-nom-${r}">
+   <input value="${cl.nif || ''}" id="cr-nif-${r}">
+   <input value="${cl.cups_consum || ''}" id="cr-cups-${r}">
+   <input value="${cl.comercialitzadora || ''}" id="cr-comercialitzadora-${r}" placeholder="Comercialitz.">
+   <input type="number" value="${cl.kw || ''}" id="cr-kw-${r}">
+   <input type="email" value="${cl.email || ''}" id="cr-email-${r}">
+   <input value="${cl.tel || ''}" id="cr-tel-${r}">
    <select id="cr-estat-${r}">
      <option value="Proposat" ${cl.estat==='Proposat'?'selected':''}>Proposat</option>
      <option value="Reserva" ${cl.estat==='Reserva'?'selected':''}>Reserva</option>
      <option value="Actiu" ${cl.estat==='Actiu'?'selected':''}>Actiu</option>
    </select>
-   <button class="del-row" onclick="removeClientRow(${r})">✕</button>`;
+   <input type="number" value="${cl.cost_fix || ''}" id="cr-cost-${r}" placeholder="€/kW">
+   <input type="number" value="${cl.autoconsum || ''}" id="cr-auto-${r}" placeholder="%Auto">
+   <button onclick="removeClientRow(${r})">✕</button>`;
 document.getElementById('client-rows-body').appendChild(div);
 }
 
