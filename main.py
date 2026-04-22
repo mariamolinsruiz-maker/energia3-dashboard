@@ -17,8 +17,6 @@ SUPABASE_URL = "https://kgjdbdgtgaqyrumgisqc.supabase.co"
 SUPABASE_KEY = "sb_publishable_1gErmWZBnUObXQPEgMHamQ_fSvIu7zr"
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-
-
 # ─────────────────────────────────────────────────────────────
 #  App
 # ─────────────────────────────────────────────────────────────
@@ -100,14 +98,12 @@ def create_community(comm: dict):
         clean["lng"]      = parse_float(comm.get("lng"))
         clean["color"]    = str(comm.get("color", "#1B4D31"))
 
-        # Dades de la instal·lació
-        clean["potencia"]             = parse_float(comm.get("potencia"))
-        clean["orientacio"]           = str(comm.get("orientacio", ""))
-        clean["inclinacio"]           = parse_int(comm.get("inclinacio"))
-        clean["producció_anual_kwh"]  = parse_float(comm.get("producció_anual_kwh"))
-        clean["cups_generacio"]       = str(comm.get("cups_generacio", ""))
-        clean["inversor_marca"]       = str(comm.get("inversor_marca", ""))
-        clean["inversor_model"]       = str(comm.get("inversor_model", ""))
+        # Dades de la instal·lació (camps existents a Supabase)
+        clean["potencia"]            = parse_float(comm.get("potencia"))
+        clean["producció_anual_kwh"] = parse_float(comm.get("producció_anual_kwh"))
+        clean["cups_generacio"]      = str(comm.get("cups_generacio", ""))
+        clean["inversor_marca"]      = str(comm.get("inversor_marca", ""))
+        clean["inversor_model"]      = str(comm.get("inversor_model", ""))
 
         clean["onboarding"]      = str(comm.get("onboarding", "Obert"))
         clean["acord_reparto"]   = str(comm.get("acord_reparto", "Pendent"))
@@ -154,14 +150,12 @@ def update_community(comm_id: str, comm: dict):
         clean["lng"]      = parse_float(comm.get("lng"))
         clean["color"]    = str(comm.get("color", "#1B4D31"))
 
-        # Dades de la instal·lació
-        clean["potencia"]             = parse_float(comm.get("potencia"))
-        clean["orientacio"]           = str(comm.get("orientacio", ""))
-        clean["inclinacio"]           = parse_int(comm.get("inclinacio"))
-        clean["producció_anual_kwh"]  = parse_float(comm.get("producció_anual_kwh"))
-        clean["cups_generacio"]       = str(comm.get("cups_generacio", ""))
-        clean["inversor_marca"]       = str(comm.get("inversor_marca", ""))
-        clean["inversor_model"]       = str(comm.get("inversor_model", ""))
+        # Dades de la instal·lació (camps existents a Supabase)
+        clean["potencia"]            = parse_float(comm.get("potencia"))
+        clean["producció_anual_kwh"] = parse_float(comm.get("producció_anual_kwh"))
+        clean["cups_generacio"]      = str(comm.get("cups_generacio", ""))
+        clean["inversor_marca"]      = str(comm.get("inversor_marca", ""))
+        clean["inversor_model"]      = str(comm.get("inversor_model", ""))
 
         clean["onboarding"]      = str(comm.get("onboarding", ""))
         clean["acord_reparto"]   = str(comm.get("acord_reparto", ""))
@@ -289,6 +283,30 @@ def get_energy(comm_id: str, start: str = None, end: str = None):
         "autoconsum":    [data_by_month[k]["autoconsum"] for k in labels],
         "excedent":      [data_by_month[k]["excedent"]   for k in labels],
         "estalvi_total": sum(data_by_month[k]["estalvi"] for k in labels),
+    }
+
+
+# ─────────────────────────────────────────────────────────────
+#  /api/energy/debug/{comm_id} — diagnòstic (eliminar en producció)
+# ─────────────────────────────────────────────────────────────
+
+@app.get("/api/energy/debug/{comm_id}")
+def debug_energy(comm_id: str):
+    """Retorna els codis de clients i les files d'energia disponibles."""
+    clients_res = supabase.table("clients").select("codi").eq("comunitat", comm_id).execute()
+    client_codis = [c["codi"] for c in clients_res.data]
+
+    energy_res = supabase.table("clients_energy").select("codi,year,month").execute()
+    energy_codis = list({r["codi"] for r in energy_res.data})
+
+    matching = [c for c in client_codis if c in energy_codis]
+
+    return {
+        "community": comm_id,
+        "client_codis": client_codis,
+        "energy_codis_available": energy_codis,
+        "matching_codis": matching,
+        "total_energy_rows": len(energy_res.data),
     }
 
 
