@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ca">
 <head>
@@ -1504,7 +1503,7 @@ document.getElementById('detail-content').innerHTML = `
 setTimeout(() => {
 initDetailMap(comm);
 initDetailChart(comm, clients);
-updateCommunityEnergy(id);
+updateCommunityEnergy(id, true); // càrrega inicial: totes les dades sense filtre
 
 const start = document.getElementById(`estalvi-start-${id}`);
 const end   = document.getElementById(`estalvi-end-${id}`);
@@ -1850,7 +1849,7 @@ if (sEl) sEl.value = startD;
 if (eEl) eEl.value = end;
 // Refresca el gràfic d'energia automàticament
 const commId = startId.replace('estalvi-start-', '');
-if (typeof updateCommunityEnergy === 'function') updateCommunityEnergy(commId);
+if (typeof updateCommunityEnergy === 'function') updateCommunityEnergy(commId, false);
 }
 
 function clearDates(commId) {
@@ -1858,7 +1857,7 @@ const start = document.getElementById(`estalvi-start-${commId}`);
 const end   = document.getElementById(`estalvi-end-${commId}`);
 if (start) start.value = '';
 if (end)   end.value   = '';
-if (typeof updateCommunityEnergy === 'function') updateCommunityEnergy(commId);
+if (typeof updateCommunityEnergy === 'function') updateCommunityEnergy(commId, true);
 }
 
 function selectIncidentType(el, type) {
