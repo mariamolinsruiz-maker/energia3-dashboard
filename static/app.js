@@ -8,6 +8,7 @@
  * main.py injecta <script src="/static/app.js"> just before </body>.
  */
 
+
 // ─────────────────────────────────────────────────────────────
 //  Helper genèric per cridar l'API
 // ─────────────────────────────────────────────────────────────
@@ -26,6 +27,7 @@ async function apiFetch(path, method = 'GET', body = undefined) {
   }
   return res.json();
 }
+
 
 // ─────────────────────────────────────────────────────────────
 //  Carrega dades de l'API i re-renderitza
