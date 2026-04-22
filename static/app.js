@@ -564,30 +564,47 @@ async function updateCommunityEnergy(commId) {
     const autoData = data.autoconsum || [];
     const excData  = data.excedent || [];
 
-    // destruir gràfic anterior
-    if (canvas._chart) canvas._chart.destroy();
+// 🔥 destruir qualsevol chart existent (IMPORTANT)
+if (typeof charts !== 'undefined' && charts[`estalvi-${commId}`]) {
+  try {
+    charts[`estalvi-${commId}`].destroy();
+  } catch(e) {}
+  delete charts[`estalvi-${commId}`];
+}
 
-    const ctx = canvas.getContext('2d');
+// també per si existeix el local
+if (canvas._chart) {
+  try {
+    canvas._chart.destroy();
+  } catch(e) {}
+}
 
-    canvas._chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [
-          { label: 'Autoconsum', data: autoData },
-          { label: 'Excedent', data: excData }
-        ]
-      }
-    });
+const ctx = canvas.getContext('2d');
 
-    // estalvi total
-    const el = document.getElementById(`estalvi-total-${commId}`);
-    if (el) {
-      el.textContent = (data.estalvi_total || 0).toFixed(2) + ' €';
-    }
+canvas._chart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      { label: 'Autoconsum', data: autoData },
+      { label: 'Excedent', data: excData }
+    ]
+  }
+});
+
+// estalvi total
+const el = document.getElementById(`estalvi-total-${commId}`);
+if (el) {
+  el.textContent = (data.estalvi_total || 0).toFixed(2) + ' €';
+}
 
   } catch (err) {
-    console.error("Error carregant energia:", err);
+  console.error("❌ Error carregant energia:", err);
+
+  const canvas = document.getElementById(`chart-estalvi-${commId}`);
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 }
 
