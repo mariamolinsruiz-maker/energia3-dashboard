@@ -8,7 +8,6 @@
  * main.py injecta <script src="/static/app.js"> just before </body>.
  */
 
-
 // ─────────────────────────────────────────────────────────────
 //  Helper genèric per cridar l'API
 // ─────────────────────────────────────────────────────────────
@@ -27,7 +26,6 @@ async function apiFetch(path, method = 'GET', body = undefined) {
   }
   return res.json();
 }
-
 
 // ─────────────────────────────────────────────────────────────
 //  Carrega dades de l'API i re-renderitza
@@ -147,8 +145,6 @@ window.saveComm = async function () {
   const fi     = fiRaw ? fiRaw.split('-').reverse().join('/') : '31/12/2026';
 
   // Camps de la instal·lació FV (opcionals per compatibilitat)
-  const orientacio   = document.getElementById('c-orientacio')?.value.trim()   || '';
-  const inclinacio   = parseInt(document.getElementById('c-inclinacio')?.value)  || 0;
   const produccio    = parseFloat(document.getElementById('c-produccio')?.value) || 0;
   const cupsGen      = document.getElementById('c-cups-gen')?.value.trim()      || '';
   const invMarca     = document.getElementById('c-inversor-marca')?.value.trim() || '';
@@ -161,8 +157,6 @@ window.saveComm = async function () {
     telefon:               document.getElementById('c-tel').value.trim(),
     adreca:                document.getElementById('c-adreca').value.trim(),
     potencia,
-    orientacio,
-    inclinacio,
     producció_anual_kwh:   produccio,
     cups_generacio:        cupsGen,
     inversor_marca:        invMarca,
@@ -463,7 +457,13 @@ function updateIncidentTypeCounters() {
 //  ENERGIA — gràfics i estadístiques
 // ─────────────────────────────────────────────────────────────
 
+// Evitar crides simultànies (debounce per comunitat)
+const _energyTimers = {};
+
 async function updateCommunityEnergy(commId) {
+  clearTimeout(_energyTimers[commId]);
+  await new Promise(resolve => { _energyTimers[commId] = setTimeout(resolve, 80); });
+  if (_energyTimers[commId] === null) return; // cancel·lat
   const startEl = document.getElementById(`estalvi-start-${commId}`);
   const endEl   = document.getElementById(`estalvi-end-${commId}`);
   const start   = startEl?.value;
