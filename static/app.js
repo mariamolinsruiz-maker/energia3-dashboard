@@ -457,20 +457,29 @@ function updateIncidentTypeCounters() {
 //  ENERGIA — gràfics i estadístiques
 // ─────────────────────────────────────────────────────────────
 
-// Evitar crides simultànies (debounce per comunitat)
+// Noms de mesos en català per l'eix X
+const _MESOS = ['Gen','Feb','Mar','Abr','Mai','Jun','Jul','Ago','Set','Oct','Nov','Des'];
+
+// Converteix "2025-01" → "Gen '25"
+function formatMonthLabel(key) {
+  const [y, m] = key.split('-').map(Number);
+  return `${_MESOS[m - 1]} '${String(y).slice(2)}`;
+}
+
+// Debounce per evitar crides simultànies
 const _energyTimers = {};
 
-async function updateCommunityEnergy(commId) {
+// forceAll=true → ignora els inputs de data i carrega TOT (ús intern al render inicial)
+async function updateCommunityEnergy(commId, forceAll = false) {
   clearTimeout(_energyTimers[commId]);
-  await new Promise(resolve => { _energyTimers[commId] = setTimeout(resolve, 80); });
-  if (_energyTimers[commId] === null) return; // cancel·lat
+  await new Promise(resolve => { _energyTimers[commId] = setTimeout(resolve, 100); });
+
   const startEl = document.getElementById(`estalvi-start-${commId}`);
   const endEl   = document.getElementById(`estalvi-end-${commId}`);
-  const start   = startEl?.value;
-  const end     = endEl?.value;
+  const start   = forceAll ? '' : (startEl?.value || '');
+  const end     = forceAll ? '' : (endEl?.value   || '');
 
   try {
-    // Construir URL — envia qualsevol filtre disponible (un o els dos)
     let url = `/api/energy/${commId}`;
     const params = [];
     if (start) params.push(`start=${start}`);
@@ -478,25 +487,40 @@ async function updateCommunityEnergy(commId) {
     if (params.length) url += '?' + params.join('&');
 
     const data = await apiFetch(url);
-    console.log('ENERGY API:', data);
+    console.log('ENERGY API:', commId, '| registres:', data.labels?.length, '| estalvi:', data.estalvi_total);
 
-    const labels   = data.labels   || [];
-    const autoData = data.autoconsum || [];
-    const excData  = data.excedent  || [];
-    const estalvi  = data.estalvi_total || 0;
+    const rawLabels = data.labels   || [];
+    const autoData  = data.autoconsum || [];
+    const excData   = data.excedent   || [];
+    const estalvi   = data.estalvi_total || 0;
+
+    // Etiquetes formatades (Gen '25, Feb '25…)
+    const labels = rawLabels.map(formatMonthLabel);
 
     // Totals acumulats
     const totalAuto = autoData.reduce((s, v) => s + v, 0);
     const totalExc  = excData.reduce((s, v) => s + v, 0);
 
-    // Opcions comunes dels gràfics
+    // Opcions comunes dels gràfics — escala automàtica, eix X amb tots els mesos
     const mkChartOpts = (yLabel) => ({
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      animation: { duration: 400 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} ${yLabel}`,
+          },
+        },
+      },
       scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 10 }, maxRotation: 45, autoSkip: false },
+        },
         y: {
+          beginAtZero: true,
           grid: { color: '#E3E8E3' },
           ticks: {
             font: { size: 10 },
@@ -509,12 +533,12 @@ async function updateCommunityEnergy(commId) {
     const mkDatasets = (aData, eData) => ([
       {
         label: 'Autoconsum', data: aData,
-        backgroundColor: 'rgba(62,171,107,0.75)',
+        backgroundColor: 'rgba(62,171,107,0.78)',
         borderRadius: 4, borderSkipped: false,
       },
       {
         label: 'Excedent', data: eData,
-        backgroundColor: 'rgba(43,108,176,0.65)',
+        backgroundColor: 'rgba(43,108,176,0.68)',
         borderRadius: 4, borderSkipped: false,
       },
     ]);
