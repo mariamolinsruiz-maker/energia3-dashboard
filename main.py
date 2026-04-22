@@ -17,6 +17,8 @@ SUPABASE_URL = "https://kgjdbdgtgaqyrumgisqc.supabase.co"
 SUPABASE_KEY = "sb_publishable_1gErmWZBnUObXQPEgMHamQ_fSvIu7zr"
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+
+
 # ─────────────────────────────────────────────────────────────
 #  App
 # ─────────────────────────────────────────────────────────────
