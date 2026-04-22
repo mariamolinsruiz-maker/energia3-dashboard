@@ -1,21 +1,25 @@
-from supabase import create_client
-
-SUPABASE_URL = "https://kgjdbdgtgaqyrumgisqc.supabase.co"
-SUPABASE_KEY = "sb_publishable_1gErmWZBnUObXQPEgMHamQ_fSvIu7zr"
-
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-
 """
 ComunitatES · main.py
-FastAPI — serveix l'HTML, /api/communities, /api/clients
+FastAPI — serveix l'HTML, /api/communities, /api/clients, /api/energy
 """
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-import json
+from supabase import create_client
 import pathlib
+
+# ─────────────────────────────────────────────────────────────
+#  Supabase
+# ─────────────────────────────────────────────────────────────
+
+SUPABASE_URL = "https://kgjdbdgtgaqyrumgisqc.supabase.co"
+SUPABASE_KEY = "sb_publishable_1gErmWZBnUObXQPEgMHamQ_fSvIu7zr"
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# ─────────────────────────────────────────────────────────────
+#  App
+# ─────────────────────────────────────────────────────────────
 
 app = FastAPI(title="ComunitatES API")
 
@@ -26,12 +30,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Fitxers estàtics (app.js, etc.) — servits a /static/
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-## ─────────────────────────────────────
-#  Helpers de dades
-# ─────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+#  Helpers
+# ─────────────────────────────────────────────────────────────
 
 def parse_float(value):
     if value is None:
@@ -39,16 +42,26 @@ def parse_float(value):
     if isinstance(value, (int, float)):
         return float(value)
     value = str(value).replace("kW", "").replace(",", ".").strip()
-    return float(value)
+    try:
+        return float(value)
+    except ValueError:
+        return 0.0
 
-# ─────────────────────────────────────
-#  Ruta principal — injecta app.js
-#  sense modificar index.html al disc
-# ─────────────────────────────────────
+def parse_int(value, default=0):
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default
+
+# ─────────────────────────────────────────────────────────────
+#  Ruta principal
+# ─────────────────────────────────────────────────────────────
+
 @app.get("/", response_class=HTMLResponse)
 def root():
     html = pathlib.Path("static/index.html").read_text(encoding="utf-8")
-    # Injecta <script src="/static/app.js"> just before </body>
     html = html.replace("</body>", '<script src="/static/app.js"></script>\n</body>', 1)
     return HTMLResponse(content=html)
 
@@ -58,64 +71,68 @@ def health():
     return {"status": "ok"}
 
 
-# ─────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
 #  /api/communities
-# ─────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+
 @app.get("/api/communities")
 def get_communities():
     res = supabase.table("communities").select("*").execute()
     return res.data
 
+
 @app.post("/api/communities", status_code=201)
 def create_community(comm: dict):
     try:
-        # 👇 neteja i tipus correctes
         clean = {}
 
-        clean["id"] = str(comm.get("id"))
-        clean["nom"] = str(comm.get("nom", ""))
-        clean["adreca"] = str(comm.get("adreca", ""))
+        clean["id"]       = str(comm.get("id", ""))
+        clean["nom"]      = str(comm.get("nom", ""))
+        clean["adreca"]   = str(comm.get("adreca", ""))
         clean["promotor"] = str(comm.get("promotor", ""))
         clean["contacte"] = str(comm.get("contacte", ""))
-        clean["email"] = str(comm.get("email", ""))
-        clean["telefon"] = str(comm.get("telefon", ""))
+        clean["email"]    = str(comm.get("email", ""))
+        clean["telefon"]  = str(comm.get("telefon", ""))
 
-        clean["lat"] = parse_float(comm.get("lat"))
-        clean["lng"] = parse_float(comm.get("lng"))
-        clean["total_kw"] = parse_float(comm.get("total_kw"))
-        clean["color"] = str(comm.get("color", "#1B4D31"))
+        clean["lat"]      = parse_float(comm.get("lat"))
+        clean["lng"]      = parse_float(comm.get("lng"))
+        clean["color"]    = str(comm.get("color", "#1B4D31"))
 
-        clean["onboarding"] = str(comm.get("onboarding", "Obert"))
-        clean["acord_reparto"] = str(comm.get("acord_reparto", "Pendent"))
+        # Dades de la instal·lació
+        clean["potencia"]             = parse_float(comm.get("potencia"))
+        clean["orientacio"]           = str(comm.get("orientacio", ""))
+        clean["inclinacio"]           = parse_int(comm.get("inclinacio"))
+        clean["producció_anual_kwh"]  = parse_float(comm.get("producció_anual_kwh"))
+        clean["cups_generacio"]       = str(comm.get("cups_generacio", ""))
+        clean["inversor_marca"]       = str(comm.get("inversor_marca", ""))
+        clean["inversor_model"]       = str(comm.get("inversor_model", ""))
+
+        clean["onboarding"]      = str(comm.get("onboarding", "Obert"))
+        clean["acord_reparto"]   = str(comm.get("acord_reparto", "Pendent"))
         clean["fi_inscripcions"] = str(comm.get("fi_inscripcions", ""))
-        clean["informe_auto"] = str(comm.get("informe_auto", ""))
-        clean["marca_blanca"] = str(comm.get("marca_blanca", ""))
+        clean["informe_auto"]    = str(comm.get("informe_auto", ""))
+        clean["marca_blanca"]    = str(comm.get("marca_blanca", ""))
 
-        # números
-        clean["clients_actius"] = int(comm.get("clients_actius", 0))
-        clean["inscrits"] = int(comm.get("inscrits", 0))
-        clean["cups_auth_actius"] = int(comm.get("cups_auth_actius", 0))
-        clean["cups_auth_proposats"] = int(comm.get("cups_auth_proposats", 0))
-        clean["sense_auth"] = int(comm.get("sense_auth", 0))
-        clean["datadis_actius"] = int(comm.get("datadis_actius", 0))
-        clean["clients_app"] = int(comm.get("clients_app", 0))
-        clean["sense_dades"] = int(comm.get("sense_dades", 0))
-        clean["sol_licituds"] = int(comm.get("sol_licituds", 0))
+        clean["clients_actius"]      = parse_int(comm.get("clients_actius"))
+        clean["inscrits"]            = parse_int(comm.get("inscrits"))
+        clean["cups_auth_actius"]    = parse_int(comm.get("cups_auth_actius"))
+        clean["cups_auth_proposats"] = parse_int(comm.get("cups_auth_proposats"))
+        clean["sense_auth"]          = parse_int(comm.get("sense_auth"))
+        clean["datadis_actius"]      = parse_int(comm.get("datadis_actius"))
+        clean["clients_app"]         = parse_int(comm.get("clients_app"))
+        clean["sense_dades"]         = parse_int(comm.get("sense_dades"))
+        clean["sol_licituds"]        = parse_int(comm.get("sol_licituds"))
+        clean["autoconsumos"]        = str(comm.get("autoconsumos", "0/0"))
+        clean["total_clients"]       = parse_int(comm.get("total_clients"))
+        clean["total_kw"]            = parse_float(comm.get("total_kw"))
+        clean["total_estalvi"]       = parse_float(comm.get("total_estalvi"))
 
-        clean["autoconsumos"] = str(comm.get("autoconsumos", "0/0"))
-
-        clean["total_clients"] = int(comm.get("total_clients", 0))
-        clean["total_kw"] = float(comm.get("total_kw", 0))
-        clean["total_estalvi"] = parse_float(comm.get("total_estalvi"))
-        
-        print("INSERT:", clean)
-
+        print("INSERT community:", clean)
         res = supabase.table("communities").insert(clean).execute()
-
         return res.data
 
     except Exception as e:
-        print("ERROR REAL:", e)
+        print("ERROR CREATE COMMUNITY:", e)
         raise HTTPException(500, str(e))
 
 
@@ -124,53 +141,61 @@ def update_community(comm_id: str, comm: dict):
     try:
         clean = {}
 
-        clean["nom"] = str(comm.get("nom", ""))
+        clean["nom"]      = str(comm.get("nom", ""))
         clean["promotor"] = str(comm.get("promotor", ""))
-        clean["adreca"] = str(comm.get("adreca", ""))
+        clean["adreca"]   = str(comm.get("adreca", ""))
         clean["contacte"] = str(comm.get("contacte", ""))
-        clean["email"] = str(comm.get("email", ""))
-        clean["telefon"] = str(comm.get("telefon", ""))
+        clean["email"]    = str(comm.get("email", ""))
+        clean["telefon"]  = str(comm.get("telefon", ""))
 
-        clean["lat"] = parse_float(comm.get("lat"))
-        clean["lng"] = parse_float(comm.get("lng"))
-        clean["potencia"] = parse_float(comm.get("potencia"))
-        clean["color"] = str(comm.get("color", "#1B4D31"))
+        clean["lat"]      = parse_float(comm.get("lat"))
+        clean["lng"]      = parse_float(comm.get("lng"))
+        clean["color"]    = str(comm.get("color", "#1B4D31"))
 
-        clean["onboarding"] = str(comm.get("onboarding", ""))
-        clean["acord_reparto"] = str(comm.get("acord_reparto", ""))
+        # Dades de la instal·lació
+        clean["potencia"]             = parse_float(comm.get("potencia"))
+        clean["orientacio"]           = str(comm.get("orientacio", ""))
+        clean["inclinacio"]           = parse_int(comm.get("inclinacio"))
+        clean["producció_anual_kwh"]  = parse_float(comm.get("producció_anual_kwh"))
+        clean["cups_generacio"]       = str(comm.get("cups_generacio", ""))
+        clean["inversor_marca"]       = str(comm.get("inversor_marca", ""))
+        clean["inversor_model"]       = str(comm.get("inversor_model", ""))
+
+        clean["onboarding"]      = str(comm.get("onboarding", ""))
+        clean["acord_reparto"]   = str(comm.get("acord_reparto", ""))
         clean["fi_inscripcions"] = str(comm.get("fi_inscripcions", ""))
-        clean["informe_auto"] = str(comm.get("informe_auto", ""))
-        clean["marca_blanca"] = str(comm.get("marca_blanca", ""))
+        clean["informe_auto"]    = str(comm.get("informe_auto", ""))
+        clean["marca_blanca"]    = str(comm.get("marca_blanca", ""))
 
-        clean["total_clients"] = int(comm.get("total_clients", 0))
-        clean["total_kw"] = parse_float(comm.get("total_kw"))
+        clean["total_clients"] = parse_int(comm.get("total_clients"))
+        clean["total_kw"]      = parse_float(comm.get("total_kw"))
         clean["total_estalvi"] = parse_float(comm.get("total_estalvi"))
 
-        res = supabase.table("communities") \
-            .update(clean) \
-            .eq("id", comm_id) \
-            .execute()
+        res = supabase.table("communities").update(clean).eq("id", comm_id).execute()
 
         if not res.data:
             raise HTTPException(404, "Comunitat no trobada")
 
         return res.data[0]
 
+    except HTTPException:
+        raise
     except Exception as e:
-        print("ERROR UPDATE:", e)
+        print("ERROR UPDATE COMMUNITY:", e)
         raise HTTPException(500, str(e))
 
 
 @app.delete("/api/communities/{comm_id}")
 def delete_community(comm_id: str):
-    supabase.table("communities").delete().eq("id", comm_id).execute()
     supabase.table("clients").delete().eq("comunitat", comm_id).execute()
+    supabase.table("communities").delete().eq("id", comm_id).execute()
     return {"ok": True}
 
 
-# ─────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
 #  /api/clients
-# ─────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+
 @app.get("/api/clients")
 def get_clients():
     res = supabase.table("clients").select("*").execute()
@@ -179,28 +204,18 @@ def get_clients():
 
 @app.post("/api/clients", status_code=201)
 def create_client(client: dict):
-    existing = supabase.table("clients") \
-        .select("codi") \
-        .eq("codi", client.get("codi")) \
-        .execute()
-
+    existing = supabase.table("clients").select("codi").eq("codi", client.get("codi")).execute()
     if existing.data:
         raise HTTPException(400, f"Ja existeix un client amb codi {client.get('codi')}")
-
     supabase.table("clients").insert(client).execute()
     return client
 
 
 @app.put("/api/clients/{codi}")
 def update_client(codi: str, client: dict):
-    res = supabase.table("clients") \
-        .update(client) \
-        .eq("codi", codi) \
-        .execute()
-
+    res = supabase.table("clients").update(client).eq("codi", codi).execute()
     if not res.data:
         raise HTTPException(404, "Client no trobat")
-
     return res.data[0]
 
 
@@ -209,10 +224,14 @@ def delete_client(codi: str):
     supabase.table("clients").delete().eq("codi", codi).execute()
     return {"ok": True}
 
+
+# ─────────────────────────────────────────────────────────────
+#  /api/energy/{comm_id}
+# ─────────────────────────────────────────────────────────────
+
 @app.get("/api/energy/{comm_id}")
 def get_energy(comm_id: str, start: str = None, end: str = None):
-
-    # 1. obtenir clients de la comunitat
+    # 1. Obtenir codis de clients de la comunitat
     clients_res = supabase.table("clients").select("codi").eq("comunitat", comm_id).execute()
     client_codis = [c["codi"] for c in clients_res.data]
 
@@ -221,62 +240,65 @@ def get_energy(comm_id: str, start: str = None, end: str = None):
     if not client_codis:
         return {"labels": [], "autoconsum": [], "excedent": [], "estalvi_total": 0}
 
-    # 2. query energia
-    query = supabase.table("clients_energy").select("*").in_("codi", client_codis)
+    # 2. Obtenir totes les dades d'energia (sense filtre de data a la query)
+    res = supabase.table("clients_energy") \
+        .select("*") \
+        .in_("codi", client_codis) \
+        .order("year", desc=False) \
+        .order("month", desc=False) \
+        .execute()
 
-    # 3. filtres dates
-    if start:
-        y, m = map(int, start.split("-"))
-        query = query.gte("year", y).gte("month", m)
-    if end:
-        y, m = map(int, end.split("-"))
-        query = query.lte("year", y).lte("month", m)
-
-    res = query.order("year", desc=False).order("month", desc=False).execute()
     rows = res.data
+    print("ROWS ENERGY (total):", len(rows))
 
-    print("ROWS ENERGY:", len(rows))
+    # 3. Filtre de dates en Python (evita problemes de rang any/mes a Supabase)
+    if start:
+        try:
+            y_s, m_s = map(int, start.split("-"))
+            start_key = y_s * 100 + m_s
+            rows = [r for r in rows if r.get("year", 0) * 100 + r.get("month", 0) >= start_key]
+        except ValueError:
+            pass  # ignorar dates mal formades
 
-    # 4. agrupar per mes
+    if end:
+        try:
+            y_e, m_e = map(int, end.split("-"))
+            end_key = y_e * 100 + m_e
+            rows = [r for r in rows if r.get("year", 0) * 100 + r.get("month", 0) <= end_key]
+        except ValueError:
+            pass
+
+    print("ROWS ENERGY (filtrats):", len(rows))
+
+    # 4. Agrupar per mes
     data_by_month = {}
-
     for r in rows:
         key = f"{r['year']}-{r['month']:02d}"
-
         if key not in data_by_month:
-            data_by_month[key] = {
-                "autoconsum": 0,
-                "excedent": 0,
-                "estalvi": 0
-            }
+            data_by_month[key] = {"autoconsum": 0, "excedent": 0, "estalvi": 0}
+        data_by_month[key]["autoconsum"] += r.get("autoconsum_kwh", 0) or 0
+        data_by_month[key]["excedent"]   += r.get("excedent_kwh",   0) or 0
+        data_by_month[key]["estalvi"]    += r.get("estalvi_mes",    0) or 0
 
-        data_by_month[key]["autoconsum"] += r.get("autoconsum_kwh", 0)
-        data_by_month[key]["excedent"] += r.get("excedent_kwh", 0)
-        data_by_month[key]["estalvi"] += r.get("estalvi_mes", 0)
-
-    # 5. format final
+    # 5. Format final
     labels = sorted(data_by_month.keys())
-
     return {
-        "labels": labels,
-        "autoconsum": [data_by_month[k]["autoconsum"] for k in labels],
-        "excedent": [data_by_month[k]["excedent"] for k in labels],
-        "estalvi_total": sum(data_by_month[k]["estalvi"] for k in labels)
+        "labels":        labels,
+        "autoconsum":    [data_by_month[k]["autoconsum"] for k in labels],
+        "excedent":      [data_by_month[k]["excedent"]   for k in labels],
+        "estalvi_total": sum(data_by_month[k]["estalvi"] for k in labels),
     }
 
-# ─────────────────────────────────────
-#  /api/agreements
-# ─────────────────────────────────────
+
+# ─────────────────────────────────────────────────────────────
+#  /api/agreements  &  /api/incidents
+# ─────────────────────────────────────────────────────────────
 
 @app.get("/api/agreements")
 def get_agreements():
     res = supabase.table("agreements").select("*").execute()
     return res.data
 
-
-# ─────────────────────────────────────
-#  /api/incidents
-# ─────────────────────────────────────
 
 @app.get("/api/incidents")
 def get_incidents():
