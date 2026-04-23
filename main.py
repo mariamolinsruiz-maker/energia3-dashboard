@@ -271,18 +271,24 @@ def get_energy(comm_id: str, start: str = None, end: str = None):
     for r in rows:
         key = f"{r['year']}-{r['month']:02d}"
         if key not in data_by_month:
-            data_by_month[key] = {"autoconsum": 0, "excedent": 0, "estalvi": 0}
-        data_by_month[key]["autoconsum"] += r.get("autoconsum_kwh", 0) or 0
-        data_by_month[key]["excedent"]   += r.get("excedent_kwh",   0) or 0
-        data_by_month[key]["estalvi"]    += r.get("estalvi_mes",    0) or 0
+            data_by_month[key] = {"autoconsum": 0, "consum": 0,"estalvi_brut": 0,"estalvi_net": 0,}
+            data_by_month[key]["autoconsum"] += r.get("autoconsum_kwh", 0) or 0
+            data_by_month[key]["consum"]     += r.get("consum_kwh", 0) or 0
+            data_by_month[key]["estalvi_brut"] += r.get("estalvi_mes", 0) or 0
+            data_by_month[key]["estalvi_net"]  += r.get("estalvi_net", 0) or 0
 
     # 5. Format final
     labels = sorted(data_by_month.keys())
     return {
-        "labels":        labels,
-        "autoconsum":    [data_by_month[k]["autoconsum"] for k in labels],
-        "excedent":      [data_by_month[k]["excedent"]   for k in labels],
-        "estalvi_total": sum(data_by_month[k]["estalvi"] for k in labels),
+        "labels": labels,
+        "autoconsum": [data_by_month[k]["autoconsum"] for k in labels],
+        "consum": [data_by_month[k]["consum"] for k in labels],
+        "estalvi_brut": [data_by_month[k]["estalvi_brut"] for k in labels],
+        "estalvi_net": [data_by_month[k]["estalvi_net"] for k in labels],
+        "estalvi_brut_total": sum(data_by_month[k]["estalvi_brut"] for k in labels),
+        "estalvi_net_total": sum(data_by_month[k]["estalvi_net"] for k in labels),
+        "consum_total": sum(data_by_month[k]["consum"] for k in labels),
+        "autoconsum_total": sum(data_by_month[k]["autoconsum"] for k in labels)
     }
 
 
