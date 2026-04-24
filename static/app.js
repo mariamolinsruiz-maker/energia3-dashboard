@@ -660,6 +660,87 @@ function exportCommunitiesAll() {
   downloadCSV(COMMUNITIES, 'communities.csv');
 }
 
+async function renderStudies() {
+  const container = document.getElementById('content');
+
+  let studies = [];
+  try {
+    studies = await apiFetch('/api/studies');
+  } catch(e) {
+    console.error('studies:', e);
+  }
+
+  container.innerHTML = `
+    <div class="page-header">
+      <h1>Estudis</h1>
+      <p>Optimització de potència abans d'assignació</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">🧠 Estudis</span>
+        <button class="btn btn-primary btn-sm" onclick="openStudyModal()">+ Nou</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>NIF</th>
+              <th>Preu kWh</th>
+              <th>Estat</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${studies.map(s => `
+              <tr>
+                <td>${s.nom || ''}</td>
+                <td>${s.nif || ''}</td>
+                <td>${s.preu_kwh || 0}</td>
+                <td>${s.status || 'pendent'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function openStudyModal() {
+  const html = `
+    <div class="modal">
+      <h3>Nou estudi</h3>
+      <input id="s-nom" placeholder="Nom"><br><br>
+      <input id="s-nif" placeholder="NIF"><br><br>
+      <input id="s-preu" placeholder="Preu kWh"><br><br>
+
+      <button onclick="saveStudy()">Guardar</button>
+    </div>
+  `;
+
+  openModal(html);
+}
+
+async function saveStudy() {
+  const data = {
+    nom: document.getElementById('s-nom').value,
+    nif: document.getElementById('s-nif').value,
+    preu_kwh: parseFloat(document.getElementById('s-preu').value) || 0
+  };
+
+  try {
+    await apiFetch('/api/studies', 'POST', data);
+  } catch(e) {
+    alert('Error guardant');
+    return;
+  }
+
+  closeModal();
+  renderStudies();
+}
+
 // ─────────────────────────────────────────────────────────────
 //  Punt d'entrada: carregar dades quan el DOM estigui llest
 // ─────────────────────────────────────────────────────────────
