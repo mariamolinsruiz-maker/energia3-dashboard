@@ -617,12 +617,6 @@ if (elRT) elRT.textContent = netTotal.toFixed(2).replace('.', ',') + ' €';
 const elBrut = document.getElementById(`estalvi-stat-brut-${commId}`);
 const elNet  = document.getElementById(`estalvi-stat-net-${commId}`);
 
-const brutTotal = data.estalvi_brut_total || 0;
-const netTotal  = data.estalvi_net_total || 0;
-
-const elBrut = document.getElementById(`estalvi-stat-brut-${commId}`);
-const elNet  = document.getElementById(`estalvi-stat-net-${commId}`);
-
 if (elBrut) elBrut.textContent = brutTotal.toFixed(2).replace('.', ',') + ' €';
 if (elNet)  elNet.textContent  = netTotal.toFixed(2).replace('.', ',') + ' €';
 
