@@ -472,7 +472,9 @@ const _energyTimers = {};
 // forceAll=true → ignora els inputs de data i carrega TOT (ús intern al render inicial)
 async function updateCommunityEnergy(commId, forceAll = false) {
   clearTimeout(_energyTimers[commId]);
-  await new Promise(resolve => { _energyTimers[commId] = setTimeout(resolve, 100); });
+  await new Promise(resolve => {
+    _energyTimers[commId] = setTimeout(resolve, 100);
+  });
 
   const startEl = document.getElementById(`estalvi-start-${commId}`);
   const endEl   = document.getElementById(`estalvi-end-${commId}`);
@@ -480,6 +482,7 @@ async function updateCommunityEnergy(commId, forceAll = false) {
   const end     = forceAll ? '' : (endEl?.value   || '');
 
   try {
+    // ───────────────────────── API CALL ─────────────────────────
     let url = `/api/energy/${commId}`;
     const params = [];
     if (start) params.push(`start=${start}`);
@@ -487,154 +490,116 @@ async function updateCommunityEnergy(commId, forceAll = false) {
     if (params.length) url += '?' + params.join('&');
 
     const data = await apiFetch(url);
-    console.log(
-  'ENERGY API:',
-  commId,
-  '| registres:', data.labels?.length,
-  '| net:', data.estalvi_net_total,
-  '| brut:', data.estalvi_brut_total
-);
-    
-    const rawLabels = data.labels   || [];
 
-    // Etiquetes formatades (Gen '25, Feb '25…)
+    const rawLabels = data.labels || [];
     const labels = rawLabels.map(formatMonthLabel);
 
-    // Opcions comunes dels gràfics — escala automàtica, eix X amb tots els mesos
-    const mkChartOpts = (yLabel) => ({
+    // ───────────────────────── CHART CONFIG ─────────────────────────
+    const mkChartOpts = (unit) => ({
       responsive: true,
       maintainAspectRatio: false,
-      animation: { duration: 400 },
       plugins: {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} ${yLabel}`,
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} ${unit}`,
           },
         },
       },
       scales: {
         x: {
           grid: { display: false },
-          ticks: { font: { size: 10 }, maxRotation: 45, autoSkip: false },
+          ticks: { font: { size: 10 }, autoSkip: false },
         },
         y: {
           beginAtZero: true,
-          grid: { color: '#E3E8E3' },
           ticks: {
-            font: { size: 10 },
-            callback: v => v.toLocaleString('ca-ES') + (yLabel === 'kWh' ? ' kWh' : ' €'),
+            callback: v => v.toLocaleString('ca-ES') + (unit === '€' ? ' €' : ' kWh'),
           },
         },
       },
     });
 
-   // ESTALVI (€)
-const mkDatasetsEstalvi = (brut, net) => ([
-  {
-    label: 'Estalvi brut',
-    data: brut,
-    backgroundColor: 'rgba(62,171,107,0.78)',
-    borderRadius: 4,
-    borderSkipped: false,
-  },
-  {
-    label: 'Estalvi net',
-    data: net,
-    backgroundColor: 'rgba(43,108,176,0.68)',
-    borderRadius: 4,
-    borderSkipped: false,
-  },
-]);
+    // ───────────────────────── DATASETS ─────────────────────────
+    const estalviDatasets = [
+      {
+        label: 'Estalvi brut',
+        data: data.estalvi_brut || [],
+        backgroundColor: 'rgba(62,171,107,0.78)',
+      },
+      {
+        label: 'Estalvi net',
+        data: data.estalvi_net || [],
+        backgroundColor: 'rgba(43,108,176,0.68)',
+      },
+    ];
 
-// EFICIÈNCIA (kWh)
-const mkDatasetsEfic = (auto, consum) => ([
-  {
-    label: 'Autoconsum',
-    data: auto,
-    backgroundColor: 'rgba(62,171,107,0.78)',
-    borderRadius: 4,
-    borderSkipped: false,
-  },
-  {
-    label: 'Consum total',
-    data: consum,
-    backgroundColor: 'rgba(43,108,176,0.68)',
-    borderRadius: 4,
-    borderSkipped: false,
-  },
-]);
-    
-    // ── Gràfic estalvi (€) ──
+    const eficDatasets = [
+      {
+        label: 'Autoconsum',
+        data: data.autoconsum || [],
+        backgroundColor: 'rgba(62,171,107,0.78)',
+      },
+      {
+        label: 'Consum total',
+        data: data.consum || [],
+        backgroundColor: 'rgba(43,108,176,0.68)',
+      },
+    ];
+
+    // ───────────────────────── CHART ESTALVI ─────────────────────────
     const cEstalvi = document.getElementById(`chart-estalvi-${commId}`);
     if (cEstalvi) {
       if (charts[`estalvi-${commId}`]) {
-        try { charts[`estalvi-${commId}`].destroy(); } catch(e) {}
+        charts[`estalvi-${commId}`].destroy();
       }
       charts[`estalvi-${commId}`] = new Chart(cEstalvi, {
         type: 'bar',
-        data: {
-  labels,
-  datasets: mkDatasetsEstalvi(
-    data.estalvi_brut || [],
-    data.estalvi_net || []
-  )
-},
+        data: { labels, datasets: estalviDatasets },
         options: mkChartOpts('€'),
       });
     }
 
-    // ── Gràfic eficiència (kWh) ──
+    // ───────────────────────── CHART EFICIÈNCIA ─────────────────────────
     const cEfic = document.getElementById(`chart-efic-${commId}`);
     if (cEfic) {
       if (charts[`efic-${commId}`]) {
-        try { charts[`efic-${commId}`].destroy(); } catch(e) {}
+        charts[`efic-${commId}`].destroy();
       }
       charts[`efic-${commId}`] = new Chart(cEfic, {
         type: 'bar',
-        data: {
-  labels,
-  datasets: mkDatasetsEfic(
-    data.autoconsum || [],
-    data.consum || []
-  )
-},
+        data: { labels, datasets: eficDatasets },
         options: mkChartOpts('kWh'),
       });
     }
 
-    // ── Actualitzar valors dels panells ──
+    // ───────────────────────── KPIs ESTALVI ─────────────────────────
+    const brutTotal = data.estalvi_brut_total || 0;
+    const netTotal  = data.estalvi_net_total || 0;
 
-// 👉 ESTALVI
-const brutTotal = data.estalvi_brut_total || 0;
-const netTotal  = data.estalvi_net_total || 0;
+    const elBrut = document.getElementById(`estalvi-stat-brut-${commId}`);
+    const elNet  = document.getElementById(`estalvi-stat-net-${commId}`);
+    const elTotal = document.getElementById(`estalvi-stat-total-${commId}`);
 
-// Rendiment tab header
-const elRT = document.getElementById(`estalvi-total-${commId}`);
-if (elRT) elRT.textContent = netTotal.toFixed(2).replace('.', ',') + ' €';
+    if (elBrut)  elBrut.textContent  = brutTotal.toFixed(2).replace('.', ',') + ' €';
+    if (elNet)   elNet.textContent   = netTotal.toFixed(2).replace('.', ',') + ' €';
+    if (elTotal) elTotal.textContent = netTotal.toFixed(2).replace('.', ',') + ' €';
 
-// Panell Estalvi
-const elBrut = document.getElementById(`estalvi-stat-brut-${commId}`);
-const elNet  = document.getElementById(`estalvi-stat-net-${commId}`);
+    // ───────────────────────── KPIs EFICIÈNCIA ─────────────────────────
+    const autoTotal   = data.autoconsum_total || 0;
+    const consumTotal = data.consum_total || 0;
 
-if (elBrut) elBrut.textContent = brutTotal.toFixed(2).replace('.', ',') + ' €';
-if (elNet)  elNet.textContent  = netTotal.toFixed(2).replace('.', ',') + ' €';
+    const elAuto = document.getElementById(`efic-stat-auto-${commId}`);
+    const elCons = document.getElementById(`efic-stat-exc-${commId}`);
+    const elPct  = document.getElementById(`efic-stat-pct-${commId}`);
 
-// 👉 EFICIÈNCIA
-const autoTotal   = data.autoconsum_total || 0;
-const consumTotal = data.consum_total || 0;
+    if (elAuto) elAuto.textContent = autoTotal.toFixed(0) + ' kWh';
+    if (elCons) elCons.textContent = consumTotal.toFixed(0) + ' kWh';
 
-const elEAuto  = document.getElementById(`efic-stat-auto-${commId}`);
-const elEConsum   = document.getElementById(`efic-stat-exc-${commId}`);
-const elEPct   = document.getElementById(`efic-stat-pct-${commId}`);
-
-if (elEAuto) elEAuto.textContent = autoTotal.toFixed(0) + ' kWh';
-if (elEConsum)  elEConsum.textContent  = consumTotal.toFixed(0) + ' kWh';
-
-if (elEPct) {
-  const pct = consumTotal > 0 ? (autoTotal / consumTotal * 100) : 0;
-  elEPct.textContent = pct.toFixed(1).replace('.', ',') + '%';
-}
+    if (elPct) {
+      const pct = consumTotal > 0 ? (autoTotal / consumTotal * 100) : 0;
+      elPct.textContent = pct.toFixed(1).replace('.', ',') + '%';
+    }
 
   } catch (err) {
     console.error('❌ Error carregant energia:', err);
