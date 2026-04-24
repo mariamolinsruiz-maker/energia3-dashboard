@@ -690,15 +690,17 @@ async function renderStudies() {
               <th>NIF</th>
               <th>Preu kWh</th>
               <th>Estat</th>
+              <th>Potència òptima</th>
             </tr>
           </thead>
           <tbody>
             ${studies.map(s => `
-              <tr>
+              <tr onclick="openStudyDetail('${s.id}')" style="cursor:pointer">
                 <td>${s.nom || ''}</td>
                 <td>${s.nif || ''}</td>
                 <td>${s.preu_kwh || 0}</td>
                 <td>${s.status || 'pendent'}</td>
+                <td>${s.potencia_optima ? s.potencia_optima + ' kW' : '-'}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -707,7 +709,6 @@ async function renderStudies() {
     </div>
   `;
 }
-
 async function saveStudy() {
   const data = {
     nom: document.getElementById('s-nom').value,
@@ -738,6 +739,87 @@ async function saveStudy() {
 
   closeModal();
   renderStudies();
+}
+async function openStudyDetail(id) {
+  const studies = await apiFetch('/api/studies');
+  const s = studies.find(x => x.id === id);
+
+  const container = document.getElementById('view-studies');
+
+  container.innerHTML = `
+    <div class="page-header">
+      <h1>${s.nom}</h1>
+      <p>Estudi de potència</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">⚡ Consum anual</span>
+      </div>
+
+      <textarea id="study-consum" rows="5" style="width:100%"
+        placeholder="Ex: 400,380,350,300,320,500,600,580,450,420,390,410"></textarea>
+
+      <br><br>
+
+      <button class="btn btn-primary" onclick="runStudy('${id}')">
+        Calcular potència òptima
+      </button>
+    </div>
+
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-header">
+        <span class="card-title">📊 Resultat</span>
+      </div>
+
+      <div>
+        ${
+          s.potencia_optima
+          ? `<h2>${s.potencia_optima} kW</h2>`
+          : 'Encara no calculat'
+        }
+      </div>
+    </div>
+
+    <br>
+    <button class="btn btn-secondary" onclick="renderStudies()">← Tornar</button>
+  `;
+}
+
+async function runStudy(id) {
+  const raw = document.getElementById('study-consum').value;
+
+  if (!raw) {
+    alert('Introdueix el consum');
+    return;
+  }
+
+  const consum = raw.split(',').map(x => parseFloat(x.trim()) || 0);
+
+  let bestKW = 0;
+  let bestValue = -Infinity;
+
+  for (let kw = 0.4; kw <= 5; kw += 0.1) {
+    const total = consum.reduce((a,b)=>a+b,0);
+
+    const autoconsum = total * Math.min(1, kw / 5);
+
+    if (autoconsum < total * 0.78) continue;
+
+    const estalvi = autoconsum * 0.2;
+
+    if (estalvi > bestValue) {
+      bestValue = estalvi;
+      bestKW = kw;
+    }
+  }
+
+  await apiFetch(`/api/studies/${id}`, 'PUT', {
+    potencia_optima: bestKW,
+    status: 'calculat'
+  });
+
+  openStudyDetail(id);
 }
 
 // ─────────────────────────────────────────────────────────────
