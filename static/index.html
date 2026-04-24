@@ -532,18 +532,23 @@ transition:color .15s;
 <div class="sidebar-search">
 <input id="global-search" type="text" placeholder="🔍  Cerca client, CUPS..." oninput="globalSearch(this.value)">
 </div>
-
-<div class="sidebar-section-label">Principal</div>
-<div class="nav-item active" data-view="dashboard" onclick="navigate('dashboard')">
-<span class="nav-icon">📊</span><span>Dashboard</span>
-</div>
-<div class="nav-item" data-view="comunitats" onclick="navigate('comunitats')">
-<span class="nav-icon">🏘️</span><span>Comunitats</span>
-</div>
-<div class="nav-item" data-view="clients" onclick="navigate('clients')">
-<span class="nav-icon">👥</span><span>Clients</span>
-</div>
-
+  
+  <div class="sidebar-section-label">Principal</div>
+  <div class="nav-item active" data-view="dashboard" onclick="navigate('dashboard')">
+    <span class="nav-icon">📊</span><span>Dashboard</span>
+  </div>
+  <div class="nav-item" data-view="comunitats" onclick="navigate('comunitats')">
+    <span class="nav-icon">🏘️</span><span>Comunitats</span>
+  </div>
+  <div class="nav-item" data-view="clients" onclick="navigate('clients')">
+    <span class="nav-icon">👥</span><span>Clients</span>
+  </div>
+  <div class="sidebar-section-label">Anàlisi</div>
+  <div class="nav-item" data-view="studies" onclick="navigate('studies')">
+    <span class="nav-icon">🧠</span>
+    <span>Estudis</span>
+  </div>
+  
 <div class="sidebar-section-label">Gestió</div>
 <div class="nav-item" data-view="acords" onclick="navigate('acords')">
 <span class="nav-icon">📝</span><span>Acords pendents</span>
