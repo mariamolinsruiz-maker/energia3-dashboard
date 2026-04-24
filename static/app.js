@@ -661,8 +661,8 @@ function exportCommunitiesAll() {
 }
 
 async function renderStudies() {
-  const container = document.getElementById('content');
-
+  const container = document.getElementById('view-studies');
+  
   let studies = [];
   try {
     studies = await apiFetch('/api/studies');
