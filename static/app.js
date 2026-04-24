@@ -635,6 +635,11 @@ if (elEPct) {
   const pct = consumTotal > 0 ? (autoTotal / consumTotal * 100) : 0;
   elEPct.textContent = pct.toFixed(1).replace('.', ',') + '%';
 }
+
+  } catch (err) {
+    console.error('❌ Error carregant energia:', err);
+  }
+}
     
 // ─────────────────────────────────────────────────────────────
 //  EXPORT CSV
