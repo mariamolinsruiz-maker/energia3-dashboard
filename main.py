@@ -335,3 +335,33 @@ def get_agreements():
 def get_incidents():
     res = supabase.table("incidents").select("*").execute()
     return res.data
+    
+# ─────────────────────────────────────────────────────────────
+#  studies
+# ─────────────────────────────────────────────────────────────
+
+@app.post("/api/studies")
+async def create_study(data: dict):
+    res = supabase.table("studies").insert(data).execute()
+    return res.data
+
+@app.get("/api/studies")
+async def get_studies():
+    res = supabase.table("studies").select("*").execute()
+    return res.data
+
+from fastapi import UploadFile, File
+
+@app.post("/api/studies/{study_id}/upload")
+async def upload_study_file(study_id: str, file: UploadFile = File(...)):
+    path = f"studies/{study_id}/{file.filename}"
+    content = await file.read()
+
+    supabase.storage.from_("files").upload(path, content)
+
+    supabase.table("study_files").insert({
+        "study_id": study_id,
+        "file_url": path
+    }).execute()
+
+    return {"ok": True}
