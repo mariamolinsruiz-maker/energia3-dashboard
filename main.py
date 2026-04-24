@@ -221,21 +221,6 @@ def delete_client(codi: str):
     return {"ok": True}
 
 # ─────────────────────────────────────────────────────────────
-#  /api/studies
-# ─────────────────────────────────────────────────────────────
-
-@app.get("/api/studies")
-def get_studies():
-    res = supabase.table("studies").select("*").execute()
-    return res.data
-
-
-@app.post("/api/studies", status_code=201)
-def create_study(data: dict):
-    res = supabase.table("studies").insert(data).execute()
-    return res.data
-
-# ─────────────────────────────────────────────────────────────
 #  /api/energy/{comm_id}
 # ─────────────────────────────────────────────────────────────
 
