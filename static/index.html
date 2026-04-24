@@ -1502,13 +1502,20 @@ document.getElementById('detail-content').innerHTML = `
 setTimeout(() => {
 initDetailMap(comm);
 initDetailChart(comm, clients);
-updateCommunityEnergy(id, true); // càrrega inicial: totes les dades sense filtre
+updateCommunityEnergy(id, 'estalvi', true);
+updateCommunityEnergy(id, 'efic', true);
 
 const start = document.getElementById(`estalvi-start-${id}`);
 const end   = document.getElementById(`estalvi-end-${id}`);
 
-if (start) start.addEventListener('change', () => updateCommunityEnergy(id));
-if (end)   end.addEventListener('change', () => updateCommunityEnergy(id));
+if (start) start.addEventListener('change', () => updateCommunityEnergy(id, 'estalvi'));
+if (end)   end.addEventListener('change', () => updateCommunityEnergy(id, 'estalvi'));
+
+const startE = document.getElementById(`efic-start-${id}`);
+const endE   = document.getElementById(`efic-end-${id}`);
+
+if (startE) startE.addEventListener('change', () => updateCommunityEnergy(id, 'efic'));
+if (endE)   endE.addEventListener('change', () => updateCommunityEnergy(id, 'efic'));
   
 }, 250);
 }
