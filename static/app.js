@@ -487,8 +487,14 @@ async function updateCommunityEnergy(commId, forceAll = false) {
     if (params.length) url += '?' + params.join('&');
 
     const data = await apiFetch(url);
-    console.log('ENERGY API:', commId, '| registres:', data.labels?.length, '| estalvi:', data.estalvi_total);
-
+    console.log(
+  'ENERGY API:',
+  commId,
+  '| registres:', data.labels?.length,
+  '| net:', data.estalvi_net_total,
+  '| brut:', data.estalvi_brut_total
+);
+    
     const rawLabels = data.labels   || [];
 
     // Etiquetes formatades (Gen '25, Feb '25…)
@@ -611,9 +617,14 @@ if (elRT) elRT.textContent = netTotal.toFixed(2).replace('.', ',') + ' €';
 const elBrut = document.getElementById(`estalvi-stat-brut-${commId}`);
 const elNet  = document.getElementById(`estalvi-stat-net-${commId}`);
 
-if (elBrut) elBrut.textContent = totalBrut.toFixed(2).replace('.', ',') + ' €';
-if (elNet)  elNet.textContent  = totalNet.toFixed(2).replace('.', ',') + ' €';
+const brutTotal = data.estalvi_brut_total || 0;
+const netTotal  = data.estalvi_net_total || 0;
 
+const elBrut = document.getElementById(`estalvi-stat-brut-${commId}`);
+const elNet  = document.getElementById(`estalvi-stat-net-${commId}`);
+
+if (elBrut) elBrut.textContent = brutTotal.toFixed(2).replace('.', ',') + ' €';
+if (elNet)  elNet.textContent  = netTotal.toFixed(2).replace('.', ',') + ' €';
 
 // 👉 EFICIÈNCIA
 const autoTotal   = data.autoconsum_total || 0;
