@@ -1339,8 +1339,8 @@ document.getElementById('detail-content').innerHTML = `
                <div style="font-size:0.68rem;color:var(--text-light);margin-bottom:2px;">Mes fi</div>
                <input type="month" class="date-input" id="efic-end-${id}" onchange="updateCommunityEnergy('${id}','efic')">
                </div>
-             <button class="btn btn-ghost btn-sm" style="margin-top:14px;">Netejar</button>
-           </div>
+               <button class="btn btn-ghost btn-sm" onclick="clearDatesEfic('${id}')">Netejar</button>
+               </div>
            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;">
              <button class="btn btn-ghost btn-sm" style="border-color:var(--g300);color:var(--g700)">Últim mes</button>
              <button class="btn btn-ghost btn-sm" style="border-color:var(--g300);color:var(--g700)">Últims 3 mesos</button>
