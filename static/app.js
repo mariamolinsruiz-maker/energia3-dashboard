@@ -470,7 +470,7 @@ function formatMonthLabel(key) {
 const _energyTimers = {};
 
 // forceAll=true → ignora els inputs de data i carrega TOT (ús intern al render inicial)
-async function updateCommunityEnergy(commId, forceAll = false) {
+async function updateCommunityEnergy(commId, type = 'estalvi', forceAll = false) {
   clearTimeout(_energyTimers[commId]);
   await new Promise(resolve => {
     _energyTimers[commId] = setTimeout(resolve, 100);
