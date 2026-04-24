@@ -549,44 +549,48 @@ async function updateCommunityEnergy(commId, type = 'estalvi', forceAll = false)
       },
     ];
 
-    // ───────────────────────── CHART ESTALVI ─────────────────────────
-    const cEstalvi = document.getElementById(`chart-estalvi-${commId}`);
-    if (cEstalvi) {
-      if (charts[`estalvi-${commId}`]) {
-        charts[`estalvi-${commId}`].destroy();
-      }
-      charts[`estalvi-${commId}`] = new Chart(cEstalvi, {
-        type: 'bar',
-        data: { labels, datasets: estalviDatasets },
-        options: mkChartOpts('€'),
-      });
+    if (type === 'estalvi') {
+  const cEstalvi = document.getElementById(`chart-estalvi-${commId}`);
+  if (cEstalvi) {
+    if (charts[`estalvi-${commId}`]) {
+      charts[`estalvi-${commId}`].destroy();
     }
+    charts[`estalvi-${commId}`] = new Chart(cEstalvi, {
+      type: 'bar',
+      data: { labels, datasets: estalviDatasets },
+      options: mkChartOpts('€'),
+    });
+  }
+}
 
-    // ───────────────────────── CHART EFICIÈNCIA ─────────────────────────
-    const cEfic = document.getElementById(`chart-efic-${commId}`);
-    if (cEfic) {
-      if (charts[`efic-${commId}`]) {
-        charts[`efic-${commId}`].destroy();
-      }
-      charts[`efic-${commId}`] = new Chart(cEfic, {
-        type: 'bar',
-        data: { labels, datasets: eficDatasets },
-        options: mkChartOpts('kWh'),
-      });
+if (type === 'efic') {
+  const cEfic = document.getElementById(`chart-efic-${commId}`);
+  if (cEfic) {
+    if (charts[`efic-${commId}`]) {
+      charts[`efic-${commId}`].destroy();
     }
+    charts[`efic-${commId}`] = new Chart(cEfic, {
+      type: 'bar',
+      data: { labels, datasets: eficDatasets },
+      options: mkChartOpts('kWh'),
+    });
+  }
+}
 
     // ───────────────────────── KPIs ESTALVI ─────────────────────────
     
-    const brutTotal = data.estalvi_brut_total || 0;
-    const netTotal  = data.estalvi_net_total || 0;
-    
-    const elBrut = document.getElementById(`estalvi-stat-brut-${commId}`);
-    const elNet  = document.getElementById(`estalvi-stat-net-${commId}`);
-    const elTotal = document.getElementById(`estalvi-stat-total-${commId}`);
-
-    if (elBrut)  elBrut.textContent  = brutTotal.toFixed(2).replace('.', ',') + ' €';
-    if (elNet)   elNet.textContent   = netTotal.toFixed(2).replace('.', ',') + ' €';
-    if (elTotal) elTotal.textContent = netTotal.toFixed(2).replace('.', ',') + ' €';
+    if (type === 'estalvi') {
+      const brutTotal = data.estalvi_brut_total || 0;
+      const netTotal  = data.estalvi_net_total || 0;
+      
+      const elBrut = document.getElementById(`estalvi-stat-brut-${commId}`);
+      const elNet  = document.getElementById(`estalvi-stat-net-${commId}`);
+      const elTotal = document.getElementById(`estalvi-stat-total-${commId}`);
+      
+      if (elBrut)  elBrut.textContent  = brutTotal.toFixed(2).replace('.', ',') + ' €';
+      if (elNet)   elNet.textContent   = netTotal.toFixed(2).replace('.', ',') + ' €';
+      if (elTotal) elTotal.textContent = netTotal.toFixed(2).replace('.', ',') + ' €';
+    }
 
     // ───────────────────────── KPIs EFICIÈNCIA ─────────────────────────
     const autoTotal   = data.autoconsum_total || 0;
