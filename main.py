@@ -271,11 +271,17 @@ def get_energy(comm_id: str, start: str = None, end: str = None):
     for r in rows:
         key = f"{r['year']}-{r['month']:02d}"
         if key not in data_by_month:
-            data_by_month[key] = {"autoconsum": 0, "consum": 0,"estalvi_brut": 0,"estalvi_net": 0,}
-            data_by_month[key]["autoconsum"] += r.get("autoconsum_kwh", 0) or 0
-            data_by_month[key]["consum"]     += r.get("consum_kwh", 0) or 0
-            data_by_month[key]["estalvi_brut"] += r.get("estalvi_mes", 0) or 0
-            data_by_month[key]["estalvi_net"]  += r.get("estalvi_net", 0) or 0
+            data_by_month[key] = {
+                "autoconsum": 0,
+                "consum": 0,
+                "estalvi_brut": 0,
+                "estalvi_net": 0,
+            }
+
+data_by_month[key]["autoconsum"] += r.get("autoconsum_kwh", 0) or 0
+data_by_month[key]["consum"]     += r.get("consum_kwh", 0) or 0
+data_by_month[key]["estalvi_brut"] += r.get("estalvi_mes", 0) or 0
+data_by_month[key]["estalvi_net"]  += r.get("estalvi_net", 0) or 0
 
     # 5. Format final
     labels = sorted(data_by_month.keys())
