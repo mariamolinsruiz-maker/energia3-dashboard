@@ -608,7 +608,17 @@ async function updateCommunityEnergy(commId, type = 'estalvi', forceAll = false)
     console.error('❌ Error carregant energia:', err);
   }
 }
-    
+
+function clearDatesEfic(commId) {
+  const start = document.getElementById(`efic-start-${commId}`);
+  const end   = document.getElementById(`efic-end-${commId}`);
+
+  if (start) start.value = '';
+  if (end)   end.value = '';
+
+  updateCommunityEnergy(commId, 'efic', true);
+}
+
 // ─────────────────────────────────────────────────────────────
 //  EXPORT CSV
 // ─────────────────────────────────────────────────────────────
