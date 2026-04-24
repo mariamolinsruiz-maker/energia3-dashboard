@@ -476,8 +476,10 @@ async function updateCommunityEnergy(commId, forceAll = false) {
     _energyTimers[commId] = setTimeout(resolve, 100);
   });
 
-  const startEl = document.getElementById(`estalvi-start-${commId}`);
-  const endEl   = document.getElementById(`estalvi-end-${commId}`);
+  const prefix = type === 'efic' ? 'efic' : 'estalvi';
+  
+  const startEl = document.getElementById(`${prefix}-start-${commId}`);
+  const endEl   = document.getElementById(`${prefix}-end-${commId}`);
   const start   = forceAll ? '' : (startEl?.value || '');
   const end     = forceAll ? '' : (endEl?.value   || '');
 
@@ -574,8 +576,13 @@ async function updateCommunityEnergy(commId, forceAll = false) {
     }
 
     // ───────────────────────── KPIs ESTALVI ─────────────────────────
-    const brutTotal = data.estalvi_brut_total || 0;
-    const netTotal  = data.estalvi_net_total || 0;
+    const brutTotal = (data.estalvi_brut_total ?? null) !== null
+      ? data.estalvi_brut_total
+      : (data.estalvi_brut || []).reduce((a, b) => a + b, 0);
+    
+    const netTotal = (data.estalvi_net_total ?? null) !== null
+      ? data.estalvi_net_total
+      : (data.estalvi_net || []).reduce((a, b) => a + b, 0);
 
     const elBrut = document.getElementById(`estalvi-stat-brut-${commId}`);
     const elNet  = document.getElementById(`estalvi-stat-net-${commId}`);
