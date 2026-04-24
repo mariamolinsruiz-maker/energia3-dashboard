@@ -224,6 +224,11 @@ def delete_client(codi: str):
 #  /api/energy/{comm_id}
 # ─────────────────────────────────────────────────────────────
 
+@app.put("/api/studies/{study_id}")
+def update_study(study_id: str, data: dict):
+    res = supabase.table("studies").update(data).eq("id", study_id).execute()
+    return res.data
+    
 @app.get("/api/energy/{comm_id}")
 def get_energy(comm_id: str, start: str = None, end: str = None):
     # 1. Obtenir codis de clients de la comunitat
