@@ -708,19 +708,18 @@ async function renderStudies() {
   `;
 }
 
-function openStudyModal() {
-  const html = `
-    <div class="modal">
-      <h3>Nou estudi</h3>
-      <input id="s-nom" placeholder="Nom"><br><br>
-      <input id="s-nif" placeholder="NIF"><br><br>
-      <input id="s-preu" placeholder="Preu kWh"><br><br>
+async function saveStudy() {
+  const data = {
+    nom: document.getElementById('s-nom').value,
+    nif: document.getElementById('s-nif').value,
+    preu_kwh: parseFloat(document.getElementById('s-preu')?.value) || 0,
+    status: 'pendent'
+  };
 
-      <button onclick="saveStudy()">Guardar</button>
-    </div>
-  `;
+  await apiFetch('/api/studies', 'POST', data);
 
-  openModal(html);
+  closeModal();
+  renderStudies();
 }
 
 async function saveStudy() {
