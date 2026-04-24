@@ -1295,18 +1295,14 @@ document.getElementById('detail-content').innerHTML = `
            </div>
            <!-- Summary stats -->
            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.6rem;margin-bottom:1rem;">
-             <div style="border:1px solid var(--g200);border-radius:var(--radius-sm);padding:0.75rem;background:var(--g50);">
-               <div style="font-size:0.68rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;">Estalvi total</div>
-               <div id="estalvi-stat-total-${id}" style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--g700)">0,00 €</div>
-             </div>
              <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.75rem;">
                <div style="font-size:0.68rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;">Estalvi brut</div>
-               <div id="estalvi-stat-auto-${id}" style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;">0,00 €</div>
+               <div id="estalvi-stat-brut-${id}" style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;">0,00 €</div>
                <div style="font-size:0.7rem;color:var(--text-light)">0,0%</div>
              </div>
              <div style="border:1px solid var(--blue-bg);border-radius:var(--radius-sm);padding:0.75rem;background:var(--blue-bg);">
                <div style="font-size:0.68rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px;">Estalvi net</div>
-               <div id="estalvi-stat-exc-${id}" style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--blue)">0,00 €</div>
+               <div id="estalvi-stat-net-${id}" style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--blue)">0,00 €</div>
                <div style="font-size:0.7rem;color:var(--text-light)">0,0%</div>
              </div>
            </div>
@@ -1314,7 +1310,7 @@ document.getElementById('detail-content').innerHTML = `
            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
              <div>
                <div style="font-weight:600;font-size:0.85rem;">Estalvi mensual</div>
-               <div style="font-size:0.75rem;color:var(--text-light)">Autoconsum i excedent</div>
+               <div style="font-size:0.75rem;color:var(--text-light)">Estalvi brut i net</div>
              </div>
              <button class="btn btn-export btn-sm">⬇ CSV</button>
            </div>
@@ -1371,7 +1367,7 @@ document.getElementById('detail-content').innerHTML = `
            <!-- Chart -->
            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
              <div>
-               <div style="font-weight:600;font-size:0.85rem;">Autoconsum i excedent</div>
+               <div style="font-weight:600;font-size:0.85rem;">Estalvi brut i net</div>
                <div style="font-size:0.75rem;color:var(--text-light)">Energia mensual (kWh)</div>
              </div>
              <button class="btn btn-export btn-sm">⬇ CSV</button>
