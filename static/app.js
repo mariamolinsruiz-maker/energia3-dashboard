@@ -577,7 +577,7 @@ async function updateCommunityEnergy(commId, type = 'estalvi', forceAll = false)
 
     // ───────────────────────── KPIs ESTALVI ─────────────────────────
     
-    const brutTotal = (data.estalvi_brut || []).reduce((a,b)=>a+b,0);
+    const brutTotal = (data.estalvi_mes || []).reduce((a,b)=>a+b,0);
     const netTotal  = (data.estalvi_net  || []).reduce((a,b)=>a+b,0);
 
     const elBrut = document.getElementById(`estalvi-stat-brut-${commId}`);
