@@ -490,16 +490,9 @@ async function updateCommunityEnergy(commId, forceAll = false) {
     console.log('ENERGY API:', commId, '| registres:', data.labels?.length, '| estalvi:', data.estalvi_total);
 
     const rawLabels = data.labels   || [];
-    const autoData  = data.autoconsum || [];
-    const excData   = data.excedent   || [];
-    const estalvi   = data.estalvi_total || 0;
 
     // Etiquetes formatades (Gen '25, Feb '25…)
     const labels = rawLabels.map(formatMonthLabel);
-
-    // Totals acumulats
-    const totalAuto = autoData.reduce((s, v) => s + v, 0);
-    const totalExc  = excData.reduce((s, v) => s + v, 0);
 
     // Opcions comunes dels gràfics — escala automàtica, eix X amb tots els mesos
     const mkChartOpts = (yLabel) => ({
@@ -530,19 +523,42 @@ async function updateCommunityEnergy(commId, forceAll = false) {
       },
     });
 
-    const mkDatasets = (aData, eData) => ([
-      {
-        label: 'Autoconsum', data: aData,
-        backgroundColor: 'rgba(62,171,107,0.78)',
-        borderRadius: 4, borderSkipped: false,
-      },
-      {
-        label: 'Excedent', data: eData,
-        backgroundColor: 'rgba(43,108,176,0.68)',
-        borderRadius: 4, borderSkipped: false,
-      },
-    ]);
+   // ESTALVI (€)
+const mkDatasetsEstalvi = (brut, net) => ([
+  {
+    label: 'Estalvi brut',
+    data: brut,
+    backgroundColor: 'rgba(62,171,107,0.78)',
+    borderRadius: 4,
+    borderSkipped: false,
+  },
+  {
+    label: 'Estalvi net',
+    data: net,
+    backgroundColor: 'rgba(43,108,176,0.68)',
+    borderRadius: 4,
+    borderSkipped: false,
+  },
+]);
 
+// EFICIÈNCIA (kWh)
+const mkDatasetsEfic = (auto, consum) => ([
+  {
+    label: 'Autoconsum',
+    data: auto,
+    backgroundColor: 'rgba(62,171,107,0.78)',
+    borderRadius: 4,
+    borderSkipped: false,
+  },
+  {
+    label: 'Consum total',
+    data: consum,
+    backgroundColor: 'rgba(43,108,176,0.68)',
+    borderRadius: 4,
+    borderSkipped: false,
+  },
+]);
+    
     // ── Gràfic estalvi (€) ──
     const cEstalvi = document.getElementById(`chart-estalvi-${commId}`);
     if (cEstalvi) {
@@ -551,7 +567,13 @@ async function updateCommunityEnergy(commId, forceAll = false) {
       }
       charts[`estalvi-${commId}`] = new Chart(cEstalvi, {
         type: 'bar',
-        data: { labels, datasets: mkDatasets(autoData, excData) },
+        data: {
+  labels,
+  datasets: mkDatasetsEstalvi(
+    data.estalvi_brut || [],
+    data.estalvi_net || []
+  )
+},
         options: mkChartOpts('€'),
       });
     }
@@ -564,42 +586,51 @@ async function updateCommunityEnergy(commId, forceAll = false) {
       }
       charts[`efic-${commId}`] = new Chart(cEfic, {
         type: 'bar',
-        data: { labels, datasets: mkDatasets(autoData, excData) },
+        data: {
+  labels,
+  datasets: mkDatasetsEfic(
+    data.autoconsum || [],
+    data.consum || []
+  )
+},
         options: mkChartOpts('kWh'),
       });
     }
 
     // ── Actualitzar valors dels panells ──
 
-    // Rendiment tab header
-    const elRT = document.getElementById(`estalvi-total-${commId}`);
-    if (elRT) elRT.textContent = estalvi.toFixed(2).replace('.', ',') + ' €';
+// 👉 ESTALVI
+const brutTotal = data.estalvi_brut_total || 0;
+const netTotal  = data.estalvi_net_total || 0;
 
-    // Panell Estalvi (IDs afegits al template)
-    const elSTotal = document.getElementById(`estalvi-stat-total-${commId}`);
-    const elSAuto  = document.getElementById(`estalvi-stat-auto-${commId}`);
-    const elSExc   = document.getElementById(`estalvi-stat-exc-${commId}`);
-    if (elSTotal) elSTotal.textContent = estalvi.toFixed(2).replace('.', ',') + ' €';
-    if (elSAuto)  elSAuto.textContent  = totalAuto.toFixed(2).replace('.', ',') + ' €';
-    if (elSExc)   elSExc.textContent   = totalExc.toFixed(2).replace('.', ',') + ' €';
+// Rendiment tab header
+const elRT = document.getElementById(`estalvi-total-${commId}`);
+if (elRT) elRT.textContent = netTotal.toFixed(2).replace('.', ',') + ' €';
 
-    // Panell Eficiència (IDs afegits al template)
-    const elEAuto  = document.getElementById(`efic-stat-auto-${commId}`);
-    const elEExc   = document.getElementById(`efic-stat-exc-${commId}`);
-    const elEPct   = document.getElementById(`efic-stat-pct-${commId}`);
-    if (elEAuto) elEAuto.textContent = totalAuto.toFixed(0) + ' kWh';
-    if (elEExc)  elEExc.textContent  = totalExc.toFixed(0) + ' kWh';
-    if (elEPct) {
-      const total = totalAuto + totalExc;
-      const pct = total > 0 ? (totalAuto / total * 100).toFixed(1) : '0,0';
-      elEPct.textContent = pct.replace('.', ',') + '%';
-    }
+// Panell Estalvi
+const elBrut = document.getElementById(`estalvi-stat-brut-${commId}`);
+const elNet  = document.getElementById(`estalvi-stat-net-${commId}`);
 
-  } catch (err) {
-    console.error('❌ Error carregant energia:', err);
-  }
+if (elBrut) elBrut.textContent = totalBrut.toFixed(2).replace('.', ',') + ' €';
+if (elNet)  elNet.textContent  = totalNet.toFixed(2).replace('.', ',') + ' €';
+
+
+// 👉 EFICIÈNCIA
+const autoTotal   = data.autoconsum_total || 0;
+const consumTotal = data.consum_total || 0;
+
+const elEAuto  = document.getElementById(`efic-stat-auto-${commId}`);
+const elEConsum   = document.getElementById(`efic-stat-exc-${commId}`);
+const elEPct   = document.getElementById(`efic-stat-pct-${commId}`);
+
+if (elEAuto) elEAuto.textContent = autoTotal.toFixed(0) + ' kWh';
+if (elEConsum)  elEConsum.textContent  = consumTotal.toFixed(0) + ' kWh';
+
+if (elEPct) {
+  const pct = consumTotal > 0 ? (autoTotal / consumTotal * 100) : 0;
+  elEPct.textContent = pct.toFixed(1).replace('.', ',') + '%';
 }
-
+    
 // ─────────────────────────────────────────────────────────────
 //  EXPORT CSV
 // ─────────────────────────────────────────────────────────────
