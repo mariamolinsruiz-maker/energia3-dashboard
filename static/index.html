@@ -1333,12 +1333,12 @@ document.getElementById('detail-content').innerHTML = `
            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:0.9rem;">
              <div>
                <div style="font-size:0.68rem;color:var(--text-light);margin-bottom:2px;">Mes inici</div>
-               <input type="month" class="date-input" id="efic-start-${id}">
-             </div>
+               <input type="month" class="date-input" id="efic-start-${id}" onchange="updateCommunityEnergy('${id}','efic')">
+               </div>
              <div>
                <div style="font-size:0.68rem;color:var(--text-light);margin-bottom:2px;">Mes fi</div>
-               <input type="month" class="date-input" id="efic-end-${id}">
-             </div>
+               <input type="month" class="date-input" id="efic-end-${id}" onchange="updateCommunityEnergy('${id}','efic')">
+               </div>
              <button class="btn btn-ghost btn-sm" style="margin-top:14px;">Netejar</button>
            </div>
            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;">
