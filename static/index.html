@@ -1495,6 +1495,9 @@ document.getElementById('detail-content').innerHTML = `
    </div>
  `;
 
+  updateCommunityEnergy(id, 'estalvi');
+  updateCommunityEnergy(id, 'efic');
+  
 // Init map + charts — wait for DOM to be fully painted
 setTimeout(() => {
 initDetailMap(comm);
